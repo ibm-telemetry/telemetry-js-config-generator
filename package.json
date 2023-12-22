@@ -1,5 +1,5 @@
 {
-  "name": "telemetry-config-script",
+  "name": "telemetry-js-config-generator",
   "description": "Automated script to generate IBM Telemetry config files",
   "version": "0.1.0",
   "license": "Apache-2.0",

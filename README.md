@@ -1,3 +1,3 @@
-# telemetry-config-script
+# telemetry-js-config-generator
 
-Script automation for generating IBM Telemetry config files according to published schema
+Script automation for generating @ibm/telemetry-js config files according to published schema.

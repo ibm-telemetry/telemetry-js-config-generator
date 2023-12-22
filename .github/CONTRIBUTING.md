@@ -38,7 +38,7 @@ rules that we also enforce, namely that:
 - The header must always be fewer than **72** characters
 - Any line in the commit body must be fewer than **100** characters
 - Header and scope must each be a value from
-  [.commitlintrc.cjs](https://github.com/ibm-telemetry/telemetry-config-script/blob/main/.commitlintrc.cjs)
+  [.commitlintrc.cjs](https://github.com/ibm-telemetry/telemetry-js-config-generator/blob/main/.commitlintrc.cjs)
 
 Most of these rules are to help with integration of `git` with common tools.
 
@@ -72,12 +72,12 @@ rest of the commit message is then used for this.
 ### Type
 
 See the `type-enum` section of
-[.commitlintrc.cjs](https://github.com/ibm-telemetry/telemetry-config-script/blob/main/.commitlintrc.cjs).
+[.commitlintrc.cjs](https://github.com/ibm-telemetry/telemetry-js-config-generator/blob/main/.commitlintrc.cjs).
 
 ### Scope
 
 See the `scope-enum` section of
-[.commitlintrc.cjs](https://github.com/ibm-telemetry/telemetry-config-script/blob/main/.commitlintrc.cjs).
+[.commitlintrc.cjs](https://github.com/ibm-telemetry/telemetry-js-config-generator/blob/main/.commitlintrc.cjs).
 
 ## Branch name conventions
 
