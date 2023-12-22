@@ -15,7 +15,7 @@ interface CommandLineOptions {
   filePath: string
   npm: boolean
   jsx: boolean
-  ignore: string[]
+  ignore?: string[]
 }
 
 interface EnumType {
@@ -120,7 +120,7 @@ collect:${npmScope}${jsxScope}`
   // fs.unlinkSync('output.json')
 }
 
-async function getAttributeNameAndValues(files: string[], ignore: string[]): Promise<[string, string]> {
+async function getAttributeNameAndValues(files: string[], ignore: string[] = []): Promise<[string, string]> {
   let errorData = ''
   const outputFilePath = 'output.json'
   const promise = new Promise<void>((resolve, reject) => {
