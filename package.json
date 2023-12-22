@@ -1,9 +1,16 @@
 {
   "name": "telemetry-config-script",
-  "version": "0.1.0",
   "description": "Automated script to generate IBM Telemetry config files",
-  "main": "index.js",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "author": "IBM",
+  "keywords": [
+    "ibm",
+    "telemetry",
+    "opentelemetry"
+  ],
   "type": "module",
+  "main": "index.js",
   "bin": {
     "telemetryconfig": "dist/generate-config-file.js"
   },
@@ -17,13 +24,6 @@
     "lint:fix": "scripts/lint_and_fix",
     "prepare": "husky install"
   },
-  "author": "IBM",
-  "keywords": [
-    "ibm",
-    "telemetry",
-    "opentelemetry"
-  ],
-  "license": "Apache-2.0",
   "dependencies": {
     "commander": "^11.1.0"
   },
