@@ -55,7 +55,7 @@ function run() {
     )
     .option(
       '-i, --ignore <files...>',
-      'List of files to ignore when scanning for JSX Scope attributes, can be an array of path(s) or glob(s).'
+      'Files to ignore when scanning for JSX Scope attributes, in glob(s) form.'
     )
     .option(
       '-p, --file-path <file-path>',
@@ -120,14 +120,19 @@ collect:${npmScope}${jsxScope}`
   // fs.unlinkSync('output.json')
 }
 
-async function getAttributeNameAndValues(files: string[], ignore: string[] = []): Promise<[string, string]> {
+async function getAttributeNameAndValues(
+  files: string[],
+  ignore: string[] = []
+): Promise<[string, string]> {
   let errorData = ''
   const outputFilePath = 'output.json'
   const promise = new Promise<void>((resolve, reject) => {
-    const ignoreString = ignore.map(glob => `--ignore "${glob}"`).join(' ')
+    const ignoreString = ignore.map((glob) => `--ignore "${glob}"`).join(' ')
     const proc = childProcess.spawn(
       // eslint-disable-next-line max-len -- long command
-      `npx @react-docgen/cli -o ${outputFilePath} ${files.join(' ')} --resolver find-all-exported-components ${ignoreString}`,
+      `npx @react-docgen/cli -o ${outputFilePath} ${files.join(
+        ' '
+      )} --resolver find-all-exported-components ${ignoreString}`,
       { shell: true }
     )
 
@@ -139,7 +144,7 @@ async function getAttributeNameAndValues(files: string[], ignore: string[] = [])
       console.error('Error: ', err)
       reject(err)
     })
- 
+
     proc.on('close', (exitCode) => {
       if (exitCode !== 0) {
         console.error('Error: ', errorData)
