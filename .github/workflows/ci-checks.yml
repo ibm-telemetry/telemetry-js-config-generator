@@ -59,3 +59,20 @@ jobs:
       - name: Build 🔨
         run: |
           npm run build
+
+  #
+  # Check code quality and test coverage
+  #
+  sonarcloud:
+    name: SonarCloud
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Disable shallow clones for better relevancy of analysis
+      - name: SonarCloud scan 🔎
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
