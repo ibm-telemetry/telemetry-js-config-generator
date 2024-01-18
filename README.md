@@ -12,7 +12,7 @@ with your project-specific configurations.
 From the root of the project that needs to be instrumented with IBM Telemetry, run the
 `telemetryconfig` command:
 
-`npx ibmtelemetryconfig --id sample-id --files ./src/components/**/*.(tsx|js|jsx)`
+`npx ibmtelemetry-config --id sample-id --files ./src/components/**/*.(tsx|js|jsx)`
 
 > Note that it is not necessary for your package to directly install this package as a dependency.
 > Instead, use `npx` to call the published collection script directly from the
@@ -25,7 +25,7 @@ From the root of the project that needs to be instrumented with IBM Telemetry, r
 Unique identifier assigned on a per-project basis. See
 [Onboarding a package to IBM Telemetry](https://github.com/ibm-telemetry/telemetry-js?tab=readme-ov-file#onboarding-a-package-to-ibm-telemetry).
 
-`npx ibmtelemetryconfig --id sample-id --files ./src/components/**/*.(tsx|js|jsx)`
+`npx ibmtelemetry-config --id sample-id --files ./src/components/**/*.(tsx|js|jsx)`
 
 ## -f, --files
 
@@ -36,9 +36,9 @@ or a glob.
 > This parameter is only required when including JSX scope in telemetry config file (done by default
 > unless opt-out, see [--no-jsx](#no-jsx)).
 
-`npx ibmtelemetryconfig --id sample-id --files ./src/components/specific-component-1.tsx ./src/components/specific-component-2.jsx`
+`npx ibmtelemetry-config --id sample-id --files ./src/components/specific-component-1.tsx ./src/components/specific-component-2.jsx`
 
-`npx ibmtelemetryconfig --id sample-id -f ./src/components/**/*.(tsx|js|jsx)`
+`npx ibmtelemetry-config --id sample-id -f ./src/components/**/*.(tsx|js|jsx)`
 
 # Optional Params
 
@@ -46,25 +46,25 @@ or a glob.
 
 Path to create config file at, defaults to `telemetry.yml`.
 
-`npx ibmtelemetryconfig --id sample-id --files ./src/components/**/*.(tsx|js|jsx) --file-path ./packages/sample/telemetry.yml`
+`npx ibmtelemetry-config --id sample-id --files ./src/components/**/*.(tsx|js|jsx) --file-path ./packages/sample/telemetry.yml`
 
 # -i, --ignore
 
 Files to ignore when scanning for JSX Scope attributes, in glob(s) form.
 
-`npx ibmtelemetryconfig --id sample-id -f ./src/components/**/*.(tsx|js|jsx) --ignore **/DataTable/*.tsx`
+`npx ibmtelemetry-config --id sample-id -f ./src/components/**/*.(tsx|js|jsx) --ignore **/DataTable/*.tsx`
 
-`npx ibmtelemetryconfig --id sample-id -f ./src/components/**/*.(tsx|js|jsx) -i **/DataTable/**/*.tsx **/Copy/**`
+`npx ibmtelemetry-config --id sample-id -f ./src/components/**/*.(tsx|js|jsx) -i **/DataTable/**/*.tsx **/Copy/**`
 
 ## --no-npm
 
 Use this option to exclude npm scope config from generated telemetry config file.
 
-`npx ibmtelemetryconfig --id sample-id --files ./src/components/**/*.(tsx|js|jsx) --no-npm`
+`npx ibmtelemetry-config --id sample-id --files ./src/components/**/*.(tsx|js|jsx) --no-npm`
 
 ## --no-jsx
 
 Use this option to exclude JSX scope config from generated telemetry config file. Omit supplying the
 `-f, --files` argument when option out of JSX config.
 
-`npx ibmtelemetryconfig --id sample-id --no-jsx`
+`npx ibmtelemetry-config --id sample-id --no-jsx`

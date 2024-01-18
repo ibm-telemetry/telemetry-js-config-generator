@@ -117,7 +117,7 @@ collect:${npmScope}${jsxScope}`
     console.error('Error writing to file: ', err)
   }
 
-  // fs.unlinkSync('output.json')
+  fs.unlinkSync('output.json')
 }
 
 async function getAttributeNameAndValues(

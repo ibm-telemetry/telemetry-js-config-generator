@@ -12,7 +12,7 @@
   "type": "module",
   "main": "index.js",
   "bin": {
-    "ibmtelemetryconfig": "dist/generate-config-file.js"
+    "ibmtelemetry-config": "dist/generate-config-file.js"
   },
   "files": [
     "dist/generate-config-file.js"
