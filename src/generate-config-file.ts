@@ -12,6 +12,7 @@ import { Command, InvalidArgumentError } from 'commander'
 interface CommandLineOptions {
   files?: string[]
   id: string
+  endpoint: string
   filePath: string
   npm: boolean
   jsx: boolean
@@ -49,6 +50,10 @@ function run() {
       '--id <project-id>',
       'Project Id, should be obtained from the IBM Telemetry team'
     )
+    .requiredOption(
+      '--endpoint <endpoint>',
+      'URL of an OpenTelemetry-compatible metrics collector API endpoint. Used to post collected telemetry data to.'
+    )
     .option(
       '-f, --files <files...>',
       'List of files to scan for JSX Scope attributes, can be an array of path(s) or glob(s). Required to generate JSX scope options'
@@ -82,8 +87,6 @@ async function generateConfigFile(opts: CommandLineOptions) {
     throw new InvalidArgumentError('--files argument must be specified for JSX scope generation')
   }
 
-  const endpoint =
-    'https://collector-prod.1am6wm210aow.us-south.codeengine.appdomain.cloud/v1/metrics'
   const version = 1
   const ymlLanguage =
     '# yaml-language-server: $schema=https://unpkg.com/@ibm/telemetry-config-schema@v1/dist/config.schema.json'
@@ -107,7 +110,7 @@ async function generateConfigFile(opts: CommandLineOptions) {
   const lines = `${ymlLanguage}
 version: ${version}
 projectId: "${opts.id}"
-endpoint: "${endpoint}"
+endpoint: "${opts.endpoint}"
 collect:${npmScope}${jsxScope}`
 
   try {
