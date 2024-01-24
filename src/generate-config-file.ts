@@ -8,6 +8,7 @@ import childProcess from 'node:child_process'
 import fs from 'node:fs'
 
 import { Command, InvalidArgumentError } from 'commander'
+import yaml, { type Node } from 'yaml'
 
 interface CommandLineOptions {
   files?: string[]
@@ -87,34 +88,38 @@ async function generateConfigFile(opts: CommandLineOptions) {
     throw new InvalidArgumentError('--files argument must be specified for JSX scope generation')
   }
 
-  const version = 1
-  const ymlLanguage =
-    '# yaml-language-server: $schema=https://unpkg.com/@ibm/telemetry-config-schema@v1/dist/config.schema.json'
+  const doc = new yaml.Document({
+    version: 1,
+    projectId: opts.id,
+    endpoint: opts.endpoint
+  })
 
-  let jsxScope = ''
-  let npmScope = ''
+  doc.commentBefore =
+    ' yaml-language-server: $schema=https://unpkg.com/@ibm/telemetry-config-schema@v1/dist/config.schema.json'
+
+  // can't pull in type from ConfigSchema because using
+  // allowedAttributeNames/allowedAttributeStringValues
+  // as yaml.Node array to be able to preserve comments
+  const collect: Record<string, unknown> = {}
 
   if (opts.jsx && opts.files) {
-    const [names, values] = await getAttributeNameAndValues(opts.files, opts.ignore)
-    const allowedAttributeNames = `\n      allowedAttributeNames:\n${names}`
-    const allowedAttributeStringValues = values
-      ? `      allowedAttributeStringValues:\n${values}`
-      : ''
-    jsxScope = `\n  jsx:\n    elements:${allowedAttributeNames}${allowedAttributeStringValues}`
+    const [names, values] = await getAttributeNameAndValues(opts.files, doc, opts.ignore)
+    collect['jsx'] = {
+      elements: {
+        allowedAttributeNames: names,
+        allowedAttributeStringValues: values
+      }
+    }
   }
 
   if (opts.npm) {
-    npmScope = '\n  npm:\n    dependencies: null'
+    collect['npm'] = { dependencies: null }
   }
 
-  const lines = `${ymlLanguage}
-version: ${version}
-projectId: "${opts.id}"
-endpoint: "${opts.endpoint}"
-collect:${npmScope}${jsxScope}`
+  doc.set('collect', collect)
 
   try {
-    fs.writeFileSync(opts.filePath, lines)
+    fs.writeFileSync(opts.filePath, doc.toString())
     // file written successfully
   } catch (err) {
     console.error('Error writing to file: ', err)
@@ -125,8 +130,9 @@ collect:${npmScope}${jsxScope}`
 
 async function getAttributeNameAndValues(
   files: string[],
+  doc: yaml.Document,
   ignore: string[] = []
-): Promise<[string, string]> {
+): Promise<[Array<Node | string>, Array<Node | string>]> {
   let errorData = ''
   const outputFilePath = 'output.json'
   const promise = new Promise<void>((resolve, reject) => {
@@ -162,7 +168,7 @@ async function getAttributeNameAndValues(
 
   if (!fs.existsSync(outputFilePath)) {
     console.error('No react-docgen file was generated for these settings')
-    return ['', '']
+    return [[], []]
   }
 
   const data = fs.readFileSync(outputFilePath, 'utf-8')
@@ -214,7 +220,9 @@ async function getAttributeNameAndValues(
                 })
             }
             // remove duplicates and sort
-            props[name] = prop.filter((value, index) => prop.indexOf(value) === index).sort()
+            props[name] = prop
+              .filter((value, index) => prop.indexOf(value) === index)
+              .sort((a, b) => a.localeCompare(b))
           })
         }
         // sort comp props
@@ -276,21 +284,27 @@ async function getAttributeNameAndValues(
       })
     })
 
-    let names = ''
-    let values = ''
+    const names: Array<Node | string> = []
+    const values: Array<Node | string> = []
 
     Object.entries(allCompPropTypes).forEach(([comp, props]) => {
       if (Object.entries(props).length) {
-        names += `        # ${comp}\n`
         const propKeys = Object.keys(props).sort((a, b) => a.localeCompare(b))
-        propKeys.forEach((propKey) => {
+        propKeys.forEach((propKey, index) => {
           const args: unknown[] = props[propKey]?.sort() ?? []
-          names += `        - '${propKey}'\n`
+          const propNode = doc.createNode(propKey)
+          names.push(propNode)
+          if (index === 0) {
+            propNode.commentBefore = ` ${comp}`
+          }
           if (args.some((propArg: unknown) => typeof propArg === 'string')) {
-            values += `        # ${comp} - ${propKey}\n`
-            args.forEach((argVal: unknown) => {
+            args.forEach((argVal: unknown, index) => {
               if (typeof argVal === 'string') {
-                values += `        - '${argVal}'\n`
+                const propValNode = doc.createNode(argVal)
+                if (index === 0) {
+                  propValNode.commentBefore = ` ${comp} - ${propKey}`
+                }
+                values.push(propValNode)
               }
             })
           }
@@ -299,13 +313,14 @@ async function getAttributeNameAndValues(
     })
 
     // add React props
-    names += '        # React\n'
-    names += "        - 'key'\n"
-    names += "        - 'ref'\n"
+    const reactKeyNode = doc.createNode('key')
+    reactKeyNode.commentBefore = ' React'
+    names.push(reactKeyNode)
+    names.push('ref')
     return [names, values]
   } catch (e) {
     console.error('Error parsing output.json data: ', e)
-    return ['', '']
+    return [[], []]
   }
 }
 

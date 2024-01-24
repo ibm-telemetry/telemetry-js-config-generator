@@ -25,7 +25,8 @@
     "prepare": "husky install"
   },
   "dependencies": {
-    "commander": "^11.1.0"
+    "commander": "^11.1.0",
+    "yaml": "^2.3.4"
   },
   "devDependencies": {
     "@commitlint/cli": "^18.0.0",
