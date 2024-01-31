@@ -9,6 +9,9 @@
     "telemetry",
     "opentelemetry"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "main": "index.js",
   "bin": {

@@ -18,7 +18,9 @@ From the root of the project that needs to be instrumented with IBM Telemetry, r
 > Instead, use `npx` to call the published collection script directly from the
 > `@ibm/telemetry-js-config-generator` package.
 
-A `telemetry.yml` file will be generated inside the cwd path, unless a file path is specified (see [--p, --file-path](#p---file-path)). Verify that the generated output is correct before using the config file.
+A `telemetry.yml` file will be generated inside the cwd path, unless a file path is specified (see
+[--p, --file-path](#p---file-path)). Verify that the generated output is correct before using the
+config file.
 
 # Required Params
 
