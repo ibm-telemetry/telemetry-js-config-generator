@@ -10,7 +10,12 @@ import fs from 'node:fs'
 import { Command, InvalidArgumentError } from 'commander'
 import yaml, { type Node } from 'yaml'
 
-import { type CommandLineOptions, type CompData, type CompPropTypes, type EnumType } from './interfaces.js'
+import {
+  type CommandLineOptions,
+  type CompData,
+  type CompPropTypes,
+  type EnumType
+} from './interfaces.js'
 
 /**
  * Sets up Commander, registers the command action, and invokes the action.
