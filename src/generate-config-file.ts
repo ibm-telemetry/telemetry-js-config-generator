@@ -1,5 +1,5 @@
 /*
- * Copyright IBM Corp. 2023, 2023
+ * Copyright IBM Corp. 2023, 2024
  *
  * This source code is licensed under the Apache-2.0 license found in the
  * LICENSE file in the root directory of this source tree.
@@ -10,36 +10,7 @@ import fs from 'node:fs'
 import { Command, InvalidArgumentError } from 'commander'
 import yaml, { type Node } from 'yaml'
 
-interface CommandLineOptions {
-  files?: string[]
-  id: string
-  endpoint: string
-  filePath: string
-  npm: boolean
-  jsx: boolean
-  ignore?: string[]
-}
-
-interface EnumType {
-  name: 'enum'
-  value: Array<{ value: string }>
-}
-
-interface UnionType {
-  name: 'union'
-  value: Array<PropData['type']>
-}
-
-interface PropData {
-  type: EnumType | UnionType
-}
-
-interface CompData {
-  displayName: keyof CompPropTypes
-  props?: Record<string, PropData>
-}
-
-type CompPropTypes = Record<string, Record<string, string[]>>
+import { type CommandLineOptions, type CompData, type CompPropTypes, type EnumType } from './interfaces.js'
 
 /**
  * Sets up Commander, registers the command action, and invokes the action.
@@ -79,7 +50,7 @@ function run() {
 }
 
 /**
- * This is the main entrypoint for telemetry collection.
+ * Generates telemetry.yml config file based on input parameters.
  *
  * @param opts - The command line options provided when the program was executed.
  */
@@ -103,12 +74,26 @@ async function generateConfigFile(opts: CommandLineOptions) {
   const collect: Record<string, unknown> = {}
 
   if (opts.jsx && opts.files) {
-    const [names, values] = await getAttributeNameAndValues(opts.files, doc, opts.ignore)
-    collect['jsx'] = {
-      elements: {
-        allowedAttributeNames: names,
-        allowedAttributeStringValues: values
+    const outputFilePath = await generateComponentData(opts.files, opts.ignore)
+
+    if (!fs.existsSync(outputFilePath)) {
+      console.error('No react-docgen file was generated for these settings')
+    } else {
+      const data = fs.readFileSync(outputFilePath, 'utf-8')
+
+      const rawData: Record<string, CompData[]> = JSON.parse(data)
+
+      const compPropTypes = parseCompData(rawData)
+
+      const [names, values] = await getAttributeNameAndValues(compPropTypes, doc)
+      collect['jsx'] = {
+        elements: {
+          allowedAttributeNames: names,
+          allowedAttributeStringValues: values
+        }
       }
+
+      fs.unlinkSync(outputFilePath)
     }
   }
 
@@ -124,18 +109,19 @@ async function generateConfigFile(opts: CommandLineOptions) {
   } catch (err) {
     console.error('Error writing to file: ', err)
   }
-
-  fs.unlinkSync('output.json')
 }
 
-async function getAttributeNameAndValues(
-  files: string[],
-  doc: yaml.Document,
-  ignore: string[] = []
-): Promise<[Array<Node | string>, Array<Node | string>]> {
+/**
+ * This is the main entrypoint for telemetry collection.
+ *
+ * @param files - List of files to generate component data for.
+ * @param ignore - Files to ignore when scanning.
+ * @returns A promise that resolves to the path of output file containing generated data.
+ */
+async function generateComponentData(files: string[], ignore: string[] = []): Promise<string> {
   let errorData = ''
   const outputFilePath = 'output.json'
-  const promise = new Promise<void>((resolve, reject) => {
+  return await new Promise<string>((resolve, reject) => {
     const ignoreString = ignore.map((glob) => `--ignore "${glob}"`).join(' ')
     const proc = childProcess.spawn(
       // eslint-disable-next-line max-len -- long command
@@ -159,135 +145,148 @@ async function getAttributeNameAndValues(
         console.error('Error: ', errorData)
         reject(new Error(errorData))
       } else {
-        resolve()
+        resolve(outputFilePath)
+      }
+    })
+  })
+}
+
+/**
+ * Parses the raw component data obtained from a `generateConfigFile` into a
+ * comprehensible CompPropTypes object.
+ *
+ * @param rawData - Raw component data.
+ * @returns Parsed CompPropTypes object.
+ */
+function parseCompData(rawData: Record<string, CompData[]>): CompPropTypes {
+  const compPropTypes: CompPropTypes = {}
+  Object.values(rawData).forEach((file: CompData[]) => {
+    file.forEach((comp) => {
+      compPropTypes[comp.displayName] = compPropTypes[comp.displayName] ?? {}
+      const props = compPropTypes[comp.displayName]
+      if (!props) {
+        // never true, but typescript
+        return
+      }
+      if (comp.props) {
+        Object.entries(comp.props).forEach(([name, info]) => {
+          props[name] = props[name] ?? []
+          const prop = props[name]
+          if (!prop) {
+            // never true, but typescript
+            return
+          }
+          if (info.type?.name === 'enum' && Array.isArray(info.type.value)) {
+            info.type.value.forEach((val) => {
+              // fix for "'top'" double quotation issue
+              if (val.value.startsWith("'") && val.value.endsWith("'")) {
+                prop.push(val.value.substring(1, val.value.length - 1))
+              } else {
+                prop.push(val.value)
+              }
+            })
+          } else if (
+            info.type?.name === 'union' &&
+            Array.isArray(info.type.value) &&
+            info.type.value?.some((nested) => nested.name === 'enum')
+          ) {
+            info.type.value
+              .filter((nested) => nested.name === 'enum' && Array.isArray(nested.value))
+              .forEach((nested) => {
+                ;(nested as EnumType).value?.forEach((val) => {
+                  // fix for "'top'" double quotation issue
+                  if (val.value.startsWith("'") && val.value.endsWith("'")) {
+                    prop.push(val.value.substring(1, val.value.length - 1))
+                  } else {
+                    prop.push(val.value)
+                  }
+                })
+              })
+          }
+          // remove duplicates and sort
+          props[name] = prop
+            .filter((value, index) => prop.indexOf(value) === index)
+            .sort((a, b) => a.localeCompare(b))
+        })
+      }
+      // sort comp props
+      const orderedPropKeys = Object.keys(props).sort((a, b) => a.localeCompare(b))
+      compPropTypes[comp.displayName] = orderedPropKeys.reduce<Record<string, string[]>>(
+        (obj, key) => {
+          const data = props[key]
+          if (data) {
+            obj[key] = data
+          }
+          return obj
+        },
+        {}
+      )
+    })
+  })
+  // sort by component names
+  const orderedCompPropTypesKeys = Object.keys(compPropTypes).sort((a, b) => a.localeCompare(b))
+
+  const orderedCompPropTypes = orderedCompPropTypesKeys.reduce<CompPropTypes>((obj, key) => {
+    const data = compPropTypes[key]
+    if (data) {
+      obj[key] = data
+    }
+    return obj
+  }, {})
+
+  const general: Record<string, string[]> = {}
+  // add General category
+  const allCompPropTypes: CompPropTypes = {
+    General: general,
+    ...orderedCompPropTypes
+  }
+
+  // Compute General Props
+  Object.entries(allCompPropTypes).forEach(([key, value]) => {
+    Object.keys(value).forEach((prop) => {
+      const hasDuplicate: boolean =
+        general[prop] !== undefined ||
+        Object.entries(allCompPropTypes).some(
+          ([duplKey, duplValue]) =>
+            duplKey !== key && Object.keys(duplValue).some((duplProp) => duplProp === prop)
+        )
+      if (hasDuplicate) {
+        const generalProp = general[prop]
+        if (generalProp) {
+          generalProp.push(...(value[prop] ?? []))
+        } else {
+          general[prop] = [...(value[prop] ?? [])]
+        }
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- need to do this
+        delete value[prop]
+        // always true, but TypeScript...
+        if (generalProp) {
+          // remove duplicates
+          general[prop] = generalProp.filter((val, index) => generalProp.indexOf(val) === index)
+        }
       }
     })
   })
 
-  await promise
+  return allCompPropTypes
+}
 
-  if (!fs.existsSync(outputFilePath)) {
-    console.error('No react-docgen file was generated for these settings')
-    return [[], []]
-  }
-
-  const data = fs.readFileSync(outputFilePath, 'utf-8')
+/**
+ * Constructs yaml node array of names and values given a CompPropTypes object.
+ *
+ * @param compPropTypes - Component prop types data.
+ * @param doc - Yaml Document to attach nodes to.
+ * @returns Promise containing two arrays, [names, values].
+ */
+async function getAttributeNameAndValues(
+  compPropTypes: CompPropTypes,
+  doc: yaml.Document
+): Promise<[Array<Node | string>, Array<Node | string>]> {
   try {
-    const parsedData: Record<string, CompData[]> = JSON.parse(data)
-
-    const compPropTypes: CompPropTypes = {}
-    Object.values(parsedData).forEach((file: CompData[]) => {
-      file.forEach((comp) => {
-        compPropTypes[comp.displayName] = compPropTypes[comp.displayName] ?? {}
-        const props = compPropTypes[comp.displayName]
-        if (!props) {
-          // never true, but typescript
-          return
-        }
-        if (comp.props) {
-          Object.entries(comp.props).forEach(([name, info]) => {
-            props[name] = props[name] ?? []
-            const prop = props[name]
-            if (!prop) {
-              // never true, but typescript
-              return
-            }
-            if (info.type?.name === 'enum' && Array.isArray(info.type.value)) {
-              info.type.value.forEach((val) => {
-                // fix for "'top'" double quotation issue
-                if (val.value.startsWith("'") && val.value.endsWith("'")) {
-                  prop.push(val.value.substring(1, val.value.length - 1))
-                } else {
-                  prop.push(val.value)
-                }
-              })
-            } else if (
-              info.type?.name === 'union' &&
-              Array.isArray(info.type.value) &&
-              info.type.value?.some((nested) => nested.name === 'enum')
-            ) {
-              info.type.value
-                .filter((nested) => nested.name === 'enum' && Array.isArray(nested.value))
-                .forEach((nested) => {
-                  ;(nested as EnumType).value?.forEach((val) => {
-                    // fix for "'top'" double quotation issue
-                    if (val.value.startsWith("'") && val.value.endsWith("'")) {
-                      prop.push(val.value.substring(1, val.value.length - 1))
-                    } else {
-                      prop.push(val.value)
-                    }
-                  })
-                })
-            }
-            // remove duplicates and sort
-            props[name] = prop
-              .filter((value, index) => prop.indexOf(value) === index)
-              .sort((a, b) => a.localeCompare(b))
-          })
-        }
-        // sort comp props
-        const orderedPropKeys = Object.keys(props).sort((a, b) => a.localeCompare(b))
-        compPropTypes[comp.displayName] = orderedPropKeys.reduce<Record<string, string[]>>(
-          (obj, key) => {
-            const data = props[key]
-            if (data) {
-              obj[key] = data
-            }
-            return obj
-          },
-          {}
-        )
-      })
-    })
-    // sort by component names
-    const orderedCompPropTypesKeys = Object.keys(compPropTypes).sort((a, b) => a.localeCompare(b))
-
-    const orderedCompPropTypes = orderedCompPropTypesKeys.reduce<CompPropTypes>((obj, key) => {
-      const data = compPropTypes[key]
-      if (data) {
-        obj[key] = data
-      }
-      return obj
-    }, {})
-
-    const general: Record<string, string[]> = {}
-    // add General category
-    const allCompPropTypes: CompPropTypes = {
-      General: general,
-      ...orderedCompPropTypes
-    }
-
-    // Compute General Props
-    Object.entries(allCompPropTypes).forEach(([key, value]) => {
-      Object.keys(value).forEach((prop) => {
-        const hasDuplicate: boolean =
-          general[prop] !== undefined ||
-          Object.entries(allCompPropTypes).some(
-            ([duplKey, duplValue]) =>
-              duplKey !== key && Object.keys(duplValue).some((duplProp) => duplProp === prop)
-          )
-        if (hasDuplicate) {
-          const generalProp = general[prop]
-          if (generalProp) {
-            generalProp.push(...(value[prop] ?? []))
-          } else {
-            general[prop] = [...(value[prop] ?? [])]
-          }
-          // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- need to do this
-          delete value[prop]
-          // always true, but TypeScript...
-          if (generalProp) {
-            // remove duplicates
-            general[prop] = generalProp.filter((val, index) => generalProp.indexOf(val) === index)
-          }
-        }
-      })
-    })
-
     const names: Array<Node | string> = []
     const values: Array<Node | string> = []
 
-    Object.entries(allCompPropTypes).forEach(([comp, props]) => {
+    Object.entries(compPropTypes).forEach(([comp, props]) => {
       if (Object.entries(props).length) {
         const propKeys = Object.keys(props).sort((a, b) => a.localeCompare(b))
         propKeys.forEach((propKey, index) => {
