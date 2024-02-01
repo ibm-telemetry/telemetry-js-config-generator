@@ -8,13 +8,15 @@ import childProcess from 'node:child_process'
 import fs from 'node:fs'
 
 import { Command, InvalidArgumentError } from 'commander'
+import { tmpNameSync } from 'tmp-promise'
 import yaml, { type Node } from 'yaml'
 
 import {
   type CommandLineOptions,
   type CompData,
   type CompPropTypes,
-  type EnumType
+  type EnumType,
+  type PropData
 } from './interfaces.js'
 
 /**
@@ -125,7 +127,11 @@ async function generateConfigFile(opts: CommandLineOptions) {
  */
 async function generateComponentData(files: string[], ignore: string[] = []): Promise<string> {
   let errorData = ''
-  const outputFilePath = 'output.json'
+  const date = new Date().toISOString()
+  const outputFilePath = tmpNameSync({
+    template: `ibmtelemetry-config-${date.replace(/[:.-]/g, '')}-XXXXXX.json`
+  })
+  console.log(outputFilePath)
   return await new Promise<string>((resolve, reject) => {
     const ignoreString = ignore.map((glob) => `--ignore "${glob}"`).join(' ')
     const proc = childProcess.spawn(
@@ -157,75 +163,85 @@ async function generateComponentData(files: string[], ignore: string[] = []): Pr
 }
 
 /**
- * Parses the raw component data obtained from a `generateConfigFile` into a
+ * Extracts prop values array from a supplied PropData object.
+ *
+ * @param propData - Raw prop data.
+ * @returns Prop values as a string array.
+ */
+function getPropValues(propData: PropData): string[] {
+  const values: string[] = []
+  if (propData.type?.name === 'enum' && Array.isArray(propData.type.value)) {
+    propData.type.value.forEach((val) => {
+      // fix for "'top'" double quotation issue
+
+      values.push(
+        val.value.startsWith("'") && val.value.endsWith("'")
+          ? val.value.substring(1, val.value.length - 1)
+          : val.value
+      )
+    })
+  } else if (propData.type?.name === 'union' && Array.isArray(propData.type.value)) {
+    propData.type.value
+      .filter((nested) => nested.name === 'enum' && Array.isArray(nested.value))
+      .forEach((nested) => {
+        ;(nested as EnumType).value?.forEach((val) => {
+          // fix for "'top'" double quotation issue
+          values.push(
+            val.value.startsWith("'") && val.value.endsWith("'")
+              ? val.value.substring(1, val.value.length - 1)
+              : val.value
+          )
+        })
+      })
+  }
+  return values
+}
+
+/**
+ * Populates the supplied `partialCompProps` object with prop data
+ * parsed from the raw `compData` object.
+ *
+ * @param compData - Raw component data.
+ * @param partialCompProps - State tracker object of previously computed props
+ * for supplied component.
+ * @returns Populated partialCompProps object.
+ */
+function addCompProps(
+  compData: CompData,
+  partialCompProps: Record<string, string[]>
+): Record<string, string[]> {
+  if (compData.props) {
+    Object.entries(compData.props).forEach(([name, propData]) => {
+      const propValues = [...getPropValues(propData), ...(partialCompProps[name] ?? [])]
+      // remove duplicates and sort
+      partialCompProps[name] = propValues
+        .filter((value, index) => propValues.indexOf(value) === index)
+        .sort((a, b) => a.localeCompare(b))
+    })
+  }
+  // sort comp props
+  const orderedPropKeys = Object.keys(partialCompProps).sort((a, b) => a.localeCompare(b))
+  return orderedPropKeys.reduce<Record<string, string[]>>((obj, key) => {
+    const data = partialCompProps[key]
+    if (data) {
+      obj[key] = data
+    }
+    return obj
+  }, {})
+}
+
+/**
+ * Parses the raw components data obtained from a `generateConfigFile` into a
  * comprehensible CompPropTypes object.
  *
- * @param rawData - Raw component data.
+ * @param rawData - Raw components data.
  * @returns Parsed CompPropTypes object.
  */
 function parseCompData(rawData: Record<string, CompData[]>): CompPropTypes {
   const compPropTypes: CompPropTypes = {}
   Object.values(rawData).forEach((file: CompData[]) => {
     file.forEach((comp) => {
-      compPropTypes[comp.displayName] = compPropTypes[comp.displayName] ?? {}
-      const props = compPropTypes[comp.displayName]
-      if (!props) {
-        // never true, but typescript
-        return
-      }
-      if (comp.props) {
-        Object.entries(comp.props).forEach(([name, info]) => {
-          props[name] = props[name] ?? []
-          const prop = props[name]
-          if (!prop) {
-            // never true, but typescript
-            return
-          }
-          if (info.type?.name === 'enum' && Array.isArray(info.type.value)) {
-            info.type.value.forEach((val) => {
-              // fix for "'top'" double quotation issue
-              if (val.value.startsWith("'") && val.value.endsWith("'")) {
-                prop.push(val.value.substring(1, val.value.length - 1))
-              } else {
-                prop.push(val.value)
-              }
-            })
-          } else if (
-            info.type?.name === 'union' &&
-            Array.isArray(info.type.value) &&
-            info.type.value?.some((nested) => nested.name === 'enum')
-          ) {
-            info.type.value
-              .filter((nested) => nested.name === 'enum' && Array.isArray(nested.value))
-              .forEach((nested) => {
-                ;(nested as EnumType).value?.forEach((val) => {
-                  // fix for "'top'" double quotation issue
-                  if (val.value.startsWith("'") && val.value.endsWith("'")) {
-                    prop.push(val.value.substring(1, val.value.length - 1))
-                  } else {
-                    prop.push(val.value)
-                  }
-                })
-              })
-          }
-          // remove duplicates and sort
-          props[name] = prop
-            .filter((value, index) => prop.indexOf(value) === index)
-            .sort((a, b) => a.localeCompare(b))
-        })
-      }
-      // sort comp props
-      const orderedPropKeys = Object.keys(props).sort((a, b) => a.localeCompare(b))
-      compPropTypes[comp.displayName] = orderedPropKeys.reduce<Record<string, string[]>>(
-        (obj, key) => {
-          const data = props[key]
-          if (data) {
-            obj[key] = data
-          }
-          return obj
-        },
-        {}
-      )
+      compPropTypes[comp.displayName] = addCompProps(comp, compPropTypes[comp.displayName] ?? {})
     })
   })
   // sort by component names
@@ -292,28 +308,24 @@ async function getAttributeNameAndValues(
     const values: Array<Node | string> = []
 
     Object.entries(compPropTypes).forEach(([comp, props]) => {
-      if (Object.entries(props).length) {
-        const propKeys = Object.keys(props).sort((a, b) => a.localeCompare(b))
-        propKeys.forEach((propKey, index) => {
-          const args: unknown[] = props[propKey]?.sort() ?? []
-          const propNode = doc.createNode(propKey)
-          names.push(propNode)
-          if (index === 0) {
-            propNode.commentBefore = ` ${comp}`
-          }
-          if (args.some((propArg: unknown) => typeof propArg === 'string')) {
-            args.forEach((argVal: unknown, index) => {
-              if (typeof argVal === 'string') {
-                const propValNode = doc.createNode(argVal)
-                if (index === 0) {
-                  propValNode.commentBefore = ` ${comp} - ${propKey}`
-                }
-                values.push(propValNode)
-              }
-            })
+      const orderedProps = Object.entries(props).sort((a, b) => a[0].localeCompare(b[0]))
+      orderedProps.forEach(([propKey, args], index) => {
+        args.sort((a, b) => a.localeCompare(b))
+        const propNode = doc.createNode(propKey)
+        names.push(propNode)
+        if (index === 0) {
+          propNode.commentBefore = ` ${comp}`
+        }
+        args.forEach((argVal: unknown, index) => {
+          if (typeof argVal === 'string') {
+            const propValNode = doc.createNode(argVal)
+            if (index === 0) {
+              propValNode.commentBefore = ` ${comp} - ${propKey}`
+            }
+            values.push(propValNode)
           }
         })
-      }
+      })
     })
 
     // add React props
@@ -323,7 +335,7 @@ async function getAttributeNameAndValues(
     names.push('ref')
     return [names, values]
   } catch (e) {
-    console.error('Error parsing output.json data: ', e)
+    console.error('Error parsing output json data: ', e)
     return [[], []]
   }
 }
