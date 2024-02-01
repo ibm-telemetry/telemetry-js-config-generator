@@ -49,9 +49,7 @@ jobs:
         if: ${{ steps.release.outputs.release_created }}
 
       - name: Build 🔨
-        run: |
-          npm run build
-          npm run bundle
+        run: npm run build
         if: ${{ steps.release.outputs.release_created }}
 
       - name: Publish 🚀
