@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/ibm-telemetry/telemetry-js-config-generator/compare/v1.0.0...v1.0.1) (2024-02-02)
+
+
+### Bug Fixes
+
+* add shebang to script and remove console.log ([5c556a2](https://github.com/ibm-telemetry/telemetry-js-config-generator/commit/5c556a2963dfc04c08bbd43feadf8866a8e80bf8))
+
 ## [1.0.0](https://github.com/ibm-telemetry/telemetry-js-config-generator/compare/v1.0.0...v1.0.0) (2024-02-01)
 
 
