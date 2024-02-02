@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/ibm-telemetry/telemetry-js-config-generator/compare/v1.0.1...v1.0.2) (2024-02-02)
+
+
+### Bug Fixes
+
+* patch release update docs ([60d1431](https://github.com/ibm-telemetry/telemetry-js-config-generator/commit/60d1431704641cb238edf138baecadea6a33aaf9))
+
 ## [1.0.1](https://github.com/ibm-telemetry/telemetry-js-config-generator/compare/v1.0.0...v1.0.1) (2024-02-02)
 
 
