@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /*
  * Copyright IBM Corp. 2023, 2024
  *
@@ -131,7 +132,6 @@ async function generateComponentData(files: string[], ignore: string[] = []): Pr
   const outputFilePath = tmpNameSync({
     template: `ibmtelemetry-config-${date.replace(/[:.-]/g, '')}-XXXXXX.json`
   })
-  console.log(outputFilePath)
   return await new Promise<string>((resolve, reject) => {
     const ignoreString = ignore.map((glob) => `--ignore "${glob}"`).join(' ')
     const proc = childProcess.spawn(
