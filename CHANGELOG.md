@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/ibm-telemetry/telemetry-js-config-generator/compare/v1.0.2...v1.0.3) (2024-02-19)
+
+
+### Bug Fixes
+
+* extend script to capture props that come in as a tstype ([#9](https://github.com/ibm-telemetry/telemetry-js-config-generator/issues/9)) ([97896fa](https://github.com/ibm-telemetry/telemetry-js-config-generator/commit/97896fad9a3e5dea1b82f349367935dccab68a02))
+
 ## [1.0.2](https://github.com/ibm-telemetry/telemetry-js-config-generator/compare/v1.0.1...v1.0.2) (2024-02-02)
 
 
