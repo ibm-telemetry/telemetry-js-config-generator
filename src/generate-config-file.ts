@@ -243,39 +243,22 @@ function addCompProps(
 }
 
 /**
- * Parses the raw components data obtained from a `generateConfigFile` into a
- * comprehensible CompPropTypes object.
+ * Given a CompPropTypes object, groups common prop types into a general category.
  *
- * @param rawData - Raw components data.
- * @returns Parsed CompPropTypes object.
+ * @param compPropTypes - Previously processed component prop types,
+ * ordered by component name and prop type key.
+ * @returns CompPropTypes object containing general category.
  */
-function parseCompData(rawData: Record<string, CompData[]>): CompPropTypes {
-  const compPropTypes: CompPropTypes = {}
-  Object.values(rawData).forEach((file: CompData[]) => {
-    file.forEach((comp) => {
-      compPropTypes[comp.displayName] = addCompProps(comp, compPropTypes[comp.displayName] ?? {})
-    })
-  })
-  // sort by component names
-  const orderedCompPropTypesKeys = Object.keys(compPropTypes).sort((a, b) => a.localeCompare(b))
-
-  const orderedCompPropTypes = orderedCompPropTypesKeys.reduce<CompPropTypes>((obj, key) => {
-    const data = compPropTypes[key]
-    if (data) {
-      obj[key] = data
-    }
-    return obj
-  }, {})
-
+function groupGeneralProps(compPropTypes: CompPropTypes) {
   const general: Record<string, string[]> = {}
   // add General category
   const allCompPropTypes: CompPropTypes = {
     General: general,
-    ...orderedCompPropTypes
+    ...compPropTypes
   }
 
   // Compute General Props
-  Object.entries(allCompPropTypes).forEach(([key, value]) => {
+  Object.entries(compPropTypes).forEach(([key, value]) => {
     Object.keys(value).forEach((prop) => {
       const hasDuplicate: boolean =
         general[prop] !== undefined ||
@@ -302,6 +285,34 @@ function parseCompData(rawData: Record<string, CompData[]>): CompPropTypes {
   })
 
   return allCompPropTypes
+}
+
+/**
+ * Parses the raw components data obtained from a `generateConfigFile` into a
+ * comprehensible CompPropTypes object.
+ *
+ * @param rawData - Raw components data.
+ * @returns Parsed CompPropTypes object.
+ */
+function parseCompData(rawData: Record<string, CompData[]>): CompPropTypes {
+  const compPropTypes: CompPropTypes = {}
+  Object.values(rawData).forEach((file: CompData[]) => {
+    file.forEach((comp) => {
+      compPropTypes[comp.displayName] = addCompProps(comp, compPropTypes[comp.displayName] ?? {})
+    })
+  })
+  // sort by component names
+  const orderedCompPropTypesKeys = Object.keys(compPropTypes).sort((a, b) => a.localeCompare(b))
+
+  const orderedCompPropTypes = orderedCompPropTypesKeys.reduce<CompPropTypes>((obj, key) => {
+    const data = compPropTypes[key]
+    if (data) {
+      obj[key] = data
+    }
+    return obj
+  }, {})
+
+  return groupGeneralProps(orderedCompPropTypes)
 }
 
 /**
