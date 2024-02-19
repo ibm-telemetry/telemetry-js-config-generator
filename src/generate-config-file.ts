@@ -171,7 +171,7 @@ async function generateComponentData(files: string[], ignore: string[] = []): Pr
 function getPropValues(propData: PropData): string[] {
   const values: string[] = []
   if (propData.type?.name === 'enum' && Array.isArray(propData.type.value)) {
-    propData.type.value.forEach((val) => {
+    propData.type.value.forEach((val: { value: string }) => {
       // fix for "'top'" double quotation issue
 
       values.push(
@@ -193,6 +193,18 @@ function getPropValues(propData: PropData): string[] {
           )
         })
       })
+  } else if (propData.tsType?.name === 'union' && Array.isArray(propData.tsType.elements)) {
+    propData.tsType.elements.forEach((el) => {
+      // fix for "'top'" double quotation issue
+
+      if (el.name === 'literal') {
+        values.push(
+          el.value.startsWith("'") && el.value.endsWith("'")
+            ? el.value.substring(1, el.value.length - 1)
+            : el.value
+        )
+      }
+    })
   }
   return values
 }

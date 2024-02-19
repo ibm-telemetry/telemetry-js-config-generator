@@ -14,18 +14,38 @@ export interface CommandLineOptions {
   ignore?: string[]
 }
 
+export interface EnumValue {
+  value: string
+}
+
 export interface EnumType {
   name: 'enum'
-  value: Array<{ value: string }>
+  value: EnumValue[]
 }
 
 export interface UnionType {
   name: 'union'
-  value: Array<PropData['type']>
+  value: Array<EnumType | UnionType>
+}
+
+export interface TSElement {
+  name: string
+  value: string
+}
+
+export interface TSUnionType {
+  name: string
+  elements?: TSElement[]
+}
+
+export interface PropType {
+  name: string
+  value: unknown
 }
 
 export interface PropData {
-  type: EnumType | UnionType
+  type?: PropType
+  tsType?: TSUnionType
 }
 
 export interface CompData {
