@@ -14,7 +14,6 @@ module.exports = {
     es2021: true
   },
   extends: [
-    'standard-with-typescript',
     'plugin:@typescript-eslint/strict',
     'plugin:eslint-comments/recommended',
     'plugin:jsdoc/recommended-typescript',
