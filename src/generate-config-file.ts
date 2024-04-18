@@ -16,7 +16,7 @@ import {
   type CommandLineOptions,
   type CompData,
   type CompPropTypes,
-  type EnumType,
+  EnumValue,
   type PropData
 } from './interfaces.js'
 
@@ -162,6 +162,24 @@ async function generateComponentData(files: string[], ignore: string[] = []): Pr
   })
 }
 
+function retrieveStringValue(val: EnumValue) {
+  if (val.computed) {
+    return
+  }
+  let sanitizedVal
+  // fix for "'top'" double quotation issue
+  if (
+    (val.value.startsWith("'") && val.value.endsWith("'")) ||
+    (val.value.startsWith('"') && val.value.endsWith('"'))
+  ) {
+    sanitizedVal = val.value.substring(1, val.value.length - 1)
+  } else {
+    sanitizedVal = val.value
+  }
+
+  return sanitizedVal
+}
+
 /**
  * Extracts prop values array from a supplied PropData object.
  *
@@ -171,26 +189,21 @@ async function generateComponentData(files: string[], ignore: string[] = []): Pr
 function getPropValues(propData: PropData): string[] {
   const values: string[] = []
   if (propData.type?.name === 'enum' && Array.isArray(propData.type.value)) {
-    propData.type.value.forEach((val: { value: string }) => {
-      // fix for "'top'" double quotation issue
-
-      values.push(
-        val.value.startsWith("'") && val.value.endsWith("'")
-          ? val.value.substring(1, val.value.length - 1)
-          : val.value
-      )
+    propData.type.value.forEach((val: EnumValue) => {
+      const sanitizedVal = retrieveStringValue(val)
+      if (sanitizedVal !== undefined) {
+        values.push(sanitizedVal)
+      }
     })
   } else if (propData.type?.name === 'union' && Array.isArray(propData.type.value)) {
     propData.type.value
       .filter((nested) => nested.name === 'enum' && Array.isArray(nested.value))
       .forEach((nested) => {
-        ;(nested as EnumType).value?.forEach((val) => {
-          // fix for "'top'" double quotation issue
-          values.push(
-            val.value.startsWith("'") && val.value.endsWith("'")
-              ? val.value.substring(1, val.value.length - 1)
-              : val.value
-          )
+        nested.value?.forEach((val: EnumValue) => {
+          const sanitizedVal = retrieveStringValue(val)
+          if (sanitizedVal !== undefined) {
+            values.push(sanitizedVal)
+          }
         })
       })
   } else if (propData.tsType?.name === 'union' && Array.isArray(propData.tsType.elements)) {
@@ -198,11 +211,10 @@ function getPropValues(propData: PropData): string[] {
       // fix for "'top'" double quotation issue
 
       if (el.name === 'literal') {
-        values.push(
-          el.value.startsWith("'") && el.value.endsWith("'")
-            ? el.value.substring(1, el.value.length - 1)
-            : el.value
-        )
+        const sanitizedVal = retrieveStringValue({ value: el.value, computed: false })
+        if (sanitizedVal !== undefined) {
+          values.push(sanitizedVal)
+        }
       }
     })
   }
