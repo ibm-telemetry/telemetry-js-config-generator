@@ -191,7 +191,7 @@ function getPropValues(propData: PropData): string[] {
   if (propData.type?.name === 'enum' && Array.isArray(propData.type.value)) {
     propData.type.value.forEach((val: EnumValue) => {
       const sanitizedVal = retrieveStringValue(val)
-      if (sanitizedVal !== undefined) {
+      if (sanitizedVal !== undefined && sanitizedVal !== '') {
         values.push(sanitizedVal)
       }
     })
@@ -201,7 +201,7 @@ function getPropValues(propData: PropData): string[] {
       .forEach((nested) => {
         nested.value?.forEach((val: EnumValue) => {
           const sanitizedVal = retrieveStringValue(val)
-          if (sanitizedVal !== undefined) {
+          if (sanitizedVal !== undefined && sanitizedVal !== '') {
             values.push(sanitizedVal)
           }
         })
@@ -212,7 +212,7 @@ function getPropValues(propData: PropData): string[] {
 
       if (el.name === 'literal') {
         const sanitizedVal = retrieveStringValue({ value: el.value, computed: false })
-        if (sanitizedVal !== undefined) {
+        if (sanitizedVal !== undefined && sanitizedVal !== '') {
           values.push(sanitizedVal)
         }
       }
