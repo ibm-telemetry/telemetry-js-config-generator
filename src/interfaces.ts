@@ -16,6 +16,7 @@ export interface CommandLineOptions {
 
 export interface EnumValue {
   value: string
+  computed: boolean
 }
 
 export interface EnumType {
