@@ -30,7 +30,7 @@
   "dependencies": {
     "commander": "^12.1.0",
     "tmp-promise": "^3.0.3",
-    "yaml": "^2.4.3"
+    "yaml": "^2.4.5"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.3.0",
