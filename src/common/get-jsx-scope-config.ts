@@ -1,6 +1,5 @@
-#!/usr/bin/env node
 /*
- * Copyright IBM Corp. 2023, 2024
+ * Copyright IBM Corp. 2024, 2024
  *
  * This source code is licensed under the Apache-2.0 license found in the
  * LICENSE file in the root directory of this source tree.
@@ -8,114 +7,48 @@
 import childProcess from 'node:child_process'
 import fs from 'node:fs'
 
-import { Command, InvalidArgumentError } from 'commander'
 import { tmpNameSync } from 'tmp-promise'
 import yaml, { type Node } from 'yaml'
 
-import {
-  type CommandLineOptions,
-  type CompData,
-  type CompPropTypes,
-  EnumValue,
-  type PropData
-} from './interfaces.js'
+import { CompData, CompPropTypes, EnumValue, PropData } from '../interfaces.js'
 
 /**
- * Sets up Commander, registers the command action, and invokes the action.
- */
-function run() {
-  const program = new Command()
-    .description('Generate IBM telemetry config file.')
-    .requiredOption(
-      '--id <project-id>',
-      'Project Id, should be obtained from the IBM Telemetry team'
-    )
-    .requiredOption(
-      '--endpoint <endpoint>',
-      'URL of an OpenTelemetry-compatible metrics collector API endpoint. Used to post collected telemetry data to.'
-    )
-    .option(
-      '-f, --files <files...>',
-      'List of files to scan for JSX Scope attributes, can be an array of path(s) or glob(s). Required to generate JSX scope options'
-    )
-    .option(
-      '-i, --ignore <files...>',
-      'Files to ignore when scanning for JSX Scope attributes, in glob(s) form.'
-    )
-    .option(
-      '-p, --file-path <file-path>',
-      'Path to create config file at, defaults to `telemetry.yml`',
-      'telemetry.yml'
-    )
-    .option('--no-npm', 'Disables config generation for npm scope')
-    .option('--no-jsx', 'Disables config generation for JSX scope')
-    .action(generateConfigFile)
-
-  program.parseAsync().catch((err) => {
-    // As a failsafe, this catches any uncaught exception, prints it to stderr, and silently exits
-    console.error(err)
-  })
-}
-
-/**
- * Generates telemetry.yml config file based on input parameters.
+ * Creates a project-specific JSX scope configuration to be placed inside telemetry config file.
  *
- * @param opts - The command line options provided when the program was executed.
+ * @param files - List of files to scan for JSX Scope attributes,
+ * can be an array of path(s) or glob(s).
+ * @param ignore - Files to ignore when scanning for JSX Scope attributes, in glob(s) form.
+ * @param doc - Yaml.document object containing current configuration.
+ * @returns JSX scope configuration containing element attribute and values
+ *  as determined by the supplied files.
  */
-async function generateConfigFile(opts: CommandLineOptions) {
-  if (opts.jsx && !opts.files) {
-    throw new InvalidArgumentError('--files argument must be specified for JSX scope generation')
-  }
+export async function getJsxScopeConfig(
+  files: string[],
+  ignore: string[] | undefined,
+  doc: yaml.Document
+) {
+  const outputFilePath = await generateComponentData(files, ignore)
 
-  const doc = new yaml.Document({
-    version: 1,
-    projectId: opts.id,
-    endpoint: opts.endpoint
-  })
+  if (!fs.existsSync(outputFilePath)) {
+    console.error('No react-docgen file was generated for these settings')
+    return null
+  } else {
+    const data = fs.readFileSync(outputFilePath, 'utf-8')
 
-  doc.commentBefore =
-    ' yaml-language-server: $schema=https://unpkg.com/@ibm/telemetry-config-schema@v1/dist/config.schema.json'
+    const rawData: Record<string, CompData[]> = JSON.parse(data)
 
-  // can't pull in type from ConfigSchema because using
-  // allowedAttributeNames/allowedAttributeStringValues
-  // as yaml.Node array to be able to preserve comments
-  const collect: Record<string, unknown> = {}
+    const compPropTypes = parseCompData(rawData)
 
-  if (opts.jsx && opts.files) {
-    const outputFilePath = await generateComponentData(opts.files, opts.ignore)
+    const [names, values] = await getAttributeNameAndValues(compPropTypes, doc)
 
-    if (!fs.existsSync(outputFilePath)) {
-      console.error('No react-docgen file was generated for these settings')
-    } else {
-      const data = fs.readFileSync(outputFilePath, 'utf-8')
+    fs.unlinkSync(outputFilePath)
 
-      const rawData: Record<string, CompData[]> = JSON.parse(data)
-
-      const compPropTypes = parseCompData(rawData)
-
-      const [names, values] = await getAttributeNameAndValues(compPropTypes, doc)
-      collect['jsx'] = {
-        elements: {
-          allowedAttributeNames: names,
-          allowedAttributeStringValues: values
-        }
+    return {
+      elements: {
+        allowedAttributeNames: names,
+        allowedAttributeStringValues: values
       }
-
-      fs.unlinkSync(outputFilePath)
     }
-  }
-
-  if (opts.npm) {
-    collect['npm'] = { dependencies: null }
-  }
-
-  doc.set('collect', collect)
-
-  try {
-    fs.writeFileSync(opts.filePath, doc.toString())
-    // file written successfully
-  } catch (err) {
-    console.error('Error writing to file: ', err)
   }
 }
 
@@ -162,6 +95,12 @@ async function generateComponentData(files: string[], ignore: string[] = []): Pr
   })
 }
 
+/**
+ * Retrieves the string value from a prop data node obtained from @react-docgen/cli run.
+ *
+ * @param val - Object to extract string value from.
+ * @returns Retrieved string value.
+ */
 function retrieveStringValue(val: EnumValue) {
   if (val.computed) {
     return
@@ -374,5 +313,3 @@ async function getAttributeNameAndValues(
     return [[], []]
   }
 }
-
-run()
