@@ -8,7 +8,8 @@ Use this tool to automatically generate an
 with your project-specific configurations.
 
 > **Note**  
-> For v1, please see [v1 docs](https://github.com/ibm-telemetry/telemetry-js-config-generator/tree/v1.0.3?tab=readme-ov-file#ibm-telemetry-js-config-generator)
+> For v1, please see
+> [v1 docs](https://github.com/ibm-telemetry/telemetry-js-config-generator/tree/v1.0.3?tab=readme-ov-file#ibm-telemetry-js-config-generator)
 
 ## Generating Config File
 
@@ -27,7 +28,8 @@ your CI environment, for example), you can call the bin like so:
 `ibmtelemetry-config generate --id sample-id --endpoint https://example.com/v1/metrics --files ./src/components/**/*.(tsx|js|jsx)`
 
 A `telemetry.yml` file will be generated inside the cwd path, unless a file path is specified (see
-parameters). Verify that the generated output is correct before using the config file.
+[parameters](#parameters)). Verify that the generated output is correct before using the config
+file.
 
 ### Parameters
 
