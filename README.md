@@ -7,8 +7,8 @@ Use this tool to automatically generate an
 [@ibm/telemetry-js](https://github.com/ibm-telemetry/telemetry-js) compatible `telemetry.yml` file
 with your project-specific configurations.
 
-> [!NOTE] For v1, please see
-> [v1 docs](https://github.com/ibm-telemetry/telemetry-js-config-generator/tree/v1.0.3?tab=readme-ov-file#ibm-telemetry-js-config-generator)
+> **Note**  
+> For v1, please see [v1 docs](https://github.com/ibm-telemetry/telemetry-js-config-generator/tree/v1.0.3?tab=readme-ov-file#ibm-telemetry-js-config-generator)
 
 ## Generating Config File
 
