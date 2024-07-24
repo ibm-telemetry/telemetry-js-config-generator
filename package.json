@@ -35,21 +35,21 @@
   "devDependencies": {
     "@commitlint/cli": "^19.3.0",
     "@commitlint/config-conventional": "^19.2.2",
-    "@types/node": "^20.14.9",
-    "@typescript-eslint/eslint-plugin": "^7.14.1",
+    "@types/node": "^20.14.11",
+    "@typescript-eslint/eslint-plugin": "^7.16.1",
     "eslint": "^8.57.0",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-jsdoc": "^48.5.0",
+    "eslint-plugin-jsdoc": "^48.7.0",
     "eslint-plugin-n": "^16.6.2",
     "eslint-plugin-notice": "^0.9.10",
-    "eslint-plugin-promise": "^6.2.0",
-    "eslint-plugin-simple-import-sort": "^12.1.0",
-    "husky": "^9.0.11",
+    "eslint-plugin-promise": "^6.4.0",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "husky": "^9.1.1",
     "lint-staged": "^15.2.7",
-    "prettier": "^3.3.2",
-    "rimraf": "^5.0.7",
-    "typescript": "^5.5.2"
+    "prettier": "^3.3.3",
+    "rimraf": "^5.0.9",
+    "typescript": "^5.5.3"
   }
 }
