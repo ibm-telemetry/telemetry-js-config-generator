@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/ibm-telemetry/telemetry-js-config-generator/compare/v2.0.0...v2.0.1) (2024-07-25)
+
+
+### Bug Fixes
+
+* await jsx update command ([#54](https://github.com/ibm-telemetry/telemetry-js-config-generator/issues/54)) ([42681d5](https://github.com/ibm-telemetry/telemetry-js-config-generator/commit/42681d5919c57dab4558ba6c50818f1434e04952))
+
 ## [2.0.0](https://github.com/ibm-telemetry/telemetry-js-config-generator/compare/v1.0.3...v2.0.0) (2024-07-25)
 
 
