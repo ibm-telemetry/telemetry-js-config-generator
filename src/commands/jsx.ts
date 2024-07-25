@@ -91,7 +91,7 @@ async function updateJsxConfigInFile(
     return
   }
 
-  updateJsxConfig(collectNode, opts.files, opts.ignore, configFile)
+  await updateJsxConfig(collectNode, opts.files, opts.ignore, configFile)
 
   configFile.set('collect', collectNode)
 
