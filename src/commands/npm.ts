@@ -15,11 +15,11 @@ import { writeConfigFile } from '../common/write-config-file.js'
 import { type CommandLineOptions } from '../interfaces.js'
 
 function buildNpmCommand() {
-  const npmCommand = new Command('npm').description('add, update or remove npm scope')
+  const npmCommand = new Command('npm').description('Add, update or remove npm scope')
 
   npmCommand
     .command('add')
-    .description('add npm scope to current config file')
+    .description('Add npm scope to current config file')
     .option(
       '-p, --file-path <file-path>',
       'Path to create config file at, defaults to `telemetry.yml`',
@@ -29,7 +29,7 @@ function buildNpmCommand() {
 
   npmCommand
     .command('update')
-    .description('regenerate the npm scope')
+    .description('Regenerate the npm scope')
     .option(
       '-p, --file-path <file-path>',
       'Path to create config file at, defaults to `telemetry.yml`',
@@ -39,7 +39,7 @@ function buildNpmCommand() {
 
   npmCommand
     .command('remove')
-    .description('remove npm scope from current config file')
+    .description('Remove npm scope from current config file')
     .option(
       '-p, --file-path <file-path>',
       'Path to create config file at, defaults to `telemetry.yml`',

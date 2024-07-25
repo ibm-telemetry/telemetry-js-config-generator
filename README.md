@@ -11,7 +11,24 @@ with your project-specific configurations.
 > For v1, please see
 > [v1 docs](https://github.com/ibm-telemetry/telemetry-js-config-generator/tree/v1.0.3?tab=readme-ov-file#ibm-telemetry-js-config-generator)
 
-## Generating Config File
+## Commands
+
+```
+Usage: ibmtelemetry-config [options] [command]
+
+Options:
+  -h, --help          display help for command
+
+Commands:
+  generate [options]  Generate IBM telemetry config file.
+  update [options]    Modify in whole or part an existing telemetry config file
+  npm                 Add, update or remove npm scope
+  js                  Add, update or remove js scope
+  jsx                 Sdd, update or remove jsx scope
+  help [command]      display help for command
+```
+
+### Generate
 
 From the root of the project that needs to be instrumented with IBM Telemetry, run the `generate`
 command:
@@ -31,65 +48,115 @@ A `telemetry.yml` file will be generated inside the cwd path, unless a file path
 [parameters](#parameters)). Verify that the generated output is correct before using the config
 file.
 
-### Parameters
+```
+Usage: ibmtelemetry-config generate [options]
 
-| Param     | Usage               | Description                                                                                                                                                                                             | Required                                                                                                           | Type             | Default           |
-| --------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ---------------- | ----------------- |
-| id        | `--id`              | Unique identifier assigned on a per-project basis. See [Onboarding a package to IBM Telemetry](https://github.com/ibm-telemetry/telemetry-js?tab=readme-ov-file#onboarding-a-package-to-ibm-telemetry). | Required                                                                                                           | String           | -                 |
-| endpoint  | `--endpoint`        | URL of an OpenTelemetry-compatible metrics collector API endpoint. Used to post collected telemetry data to.                                                                                            | Required                                                                                                           | String           | -                 |
-| files     | `-f`, `--files`     | Files to scan component props for (used to generate `allowedAttributeNames` and `allowedAttributeStringValues` arrays in JSX scope config). Can be a space-separated list of files or a glob.           | Required when including JSX scope in telemetry config file (done by default unless opt-out, see `--no-jsx` param). | String[], String | -                 |
-| file path | `-p`, `--file-path` | Path to create config file at.                                                                                                                                                                          | Optional                                                                                                           | String           | `./telemetry.yml` |
-| ignore    | `-i`, `--ignore`    | Files to ignore when scanning for JSX Scope attributes, in glob(s) form.                                                                                                                                | Optional                                                                                                           | String[], String | -                 |
-| no npm    | `--no-npm`          | Use this option to exclude `npm` scope config from generated telemetry config file.                                                                                                                     | Optional                                                                                                           | param only       | -                 |
-| no jsx    | `--no-jsx`          | Use this option to exclude `JSX` scope config from generated telemetry config file. Omit supplying the `-f, --files` and `-i, --ignore` arguments when opting out of JSX config.                        | Optional                                                                                                           | param only       | -                 |
-| no js     | `--no-js`           | Use this option to exclude `js` scope config from generated telemetry config file.                                                                                                                      | Optional                                                                                                           | param only       | -                 |
+Generate IBM telemetry config file.
 
-### Example Usage
+Options:
+  --id <project-id>            Project Id, should be obtained from the IBM Telemetry team
+  --endpoint <endpoint>        URL of an OpenTelemetry-compatible metrics collector API endpoint. Used to post collected telemetry data to.
+  -f, --files <files...>       List of files to scan for JSX Scope attributes, can be an array of path(s) or glob(s). Required to generate JSX scope options
+  -i, --ignore <files...>      Files to ignore when scanning for JSX Scope attributes, in glob(s) form.
+  -p, --file-path <file-path>  Path to create config file at, defaults to `telemetry.yml` (default: "telemetry.yml")
+  --no-npm                     Disables config generation for npm scope
+  --no-jsx                     Disables config generation for JSX scope
+  --no-js                      Disables config generation for JS scope
+  -h, --help                   display help for command
+```
+
+#### Example Usage
 
 `npx -y @ibm/telemetry-js-config-generator generate --id sample-id --endpoint https://example.com/v1/metrics --files ./src/components/**/*.(tsx|js|jsx) --file-path ./packages/sample/telemetry.yml -i **/DataTable/**/*.tsx **/Copy/** --no-npm --no-js`
 
 `ibmtelemetry-config generate --id sample-id --endpoint https://example.com/v1/metrics --no-jsx`
 
-## Updating existing config file
+### Update
 
 To update an existing telemetry config file, run the `update` command. You can use this command to
 regenerate entirely a telemetry configuration or only in-part (see available parameters). Remember
 to supply the `file path` parameter if your telemetry config is not at the default location.
 
-### Parameters
+```
+Usage: ibmtelemetry-config update [options]
 
-| Param     | Usage               | Description                                                                                                                                                                                                                                                                                                     | Required                                                                                        | Type             | Default           |
-| --------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ---------------- | ----------------- |
-| id        | `--id`              | Unique identifier assigned on a per-project basis. See [Onboarding a package to IBM Telemetry](https://github.com/ibm-telemetry/telemetry-js?tab=readme-ov-file#onboarding-a-package-to-ibm-telemetry). Supplying this optional parameter will overwrite the current `id` set in the existing telemetry config. | Optional                                                                                        | String           | -                 |
-| endpoint  | `--endpoint`        | URL of an OpenTelemetry-compatible metrics collector API endpoint. Used to post collected telemetry data to. Supplying this optional parameter will overwrite the current `endpoint` set in the existing telemetry config.                                                                                      | Optional                                                                                        | String           | -                 |
-| files     | `-f`, `--files`     | Files to scan component props for (used to generate `allowedAttributeNames` and `allowedAttributeStringValues` arrays in JSX scope config). Can be a space-separated list of files or a glob.                                                                                                                   | Optional. If this parameter is not specified, the `jsx` scope will **not** be regenerated.      | String[], String | -                 |
-| file path | `-p`, `--file-path` | Path to read and write config file at. Should be the path to the existing config file.                                                                                                                                                                                                                          | Optional. Program will try to read the current config file from `'./telemetry.yml'` if omitted. | String           | `./telemetry.yml` |
-| ignore    | `-i`, `--ignore`    | Files to ignore when scanning for JSX Scope attributes, in glob(s) form.                                                                                                                                                                                                                                        | Optional                                                                                        | String[], String | -                 |
-| no npm    | `--no-npm`          | Use this option to bypass updating `npm` scope config. Note that an existing npm configuration will not be removed by using this option.                                                                                                                                                                        | Optional                                                                                        | param only       | -                 |
-| no jsx    | `--no-jsx`          | Use this option to bypass updating `jsx` scope config. Note that an existing jsx configuration will not be removed by using this option. Omit supplying the `-f, --files` and `-i, --ignore` arguments when opting out of JSX config.                                                                           | Optional                                                                                        | param only       | -                 |
-| no js     | `--no-js`           | Use this option to bypass updating `js` scope config. Note that an existing js configuration will not be removed by using this option.                                                                                                                                                                          | Optional                                                                                        | param only       | -                 |
+Modify in whole or part an existing telemetry config file
 
-### Example Usage
+Options:
+  --id <project-id>            Project Id, should be obtained from the IBM Telemetry team
+  --endpoint <endpoint>        URL of an OpenTelemetry-compatible metrics collector API endpoint. Used to post collected telemetry data to.
+  -f, --files <files...>       List of files to scan for JSX Scope attributes, can be an array of path(s) or glob(s). Required to generate JSX scope options
+  -i, --ignore <files...>      Files to ignore when scanning for JSX Scope attributes, in glob(s) form.
+  -p, --file-path <file-path>  Path to create config file at, defaults to `telemetry.yml` (default: "telemetry.yml")
+  --no-npm                     Disables config generation for npm scope
+  --no-jsx                     Disables config generation for JSX scope
+  --no-js                      Disables config generation for JS scope
+  -h, --help                   display help for command
+```
+
+#### Example Usage
 
 `npx -y @ibm/telemetry-js-config-generator update --files ./src/components/**/*.(tsx|js|jsx)`
 
 `ibmtelemetry-config update --no-jsx`
-
-## Adding, removing and updating scopes
-
-You may add, update or remove scopes from an existing telemetry configuration file by using the
-scope specific commands:
 
 ### npm
 
 Use `npm` command along with `add`, `update` or `remove` subcommands. Remember to supply the
 `file path` parameter if your telemetry config is not at the default location.
 
-#### Parameters
+```
+Usage: ibmtelemetry-config npm [options] [command]
 
-| Param     | Command                                                   | Usage               | Description                                                                            | Required                                                                                        | Type   | Default           |
-| --------- | --------------------------------------------------------- | ------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------ | ----------------- |
-| file path | <ul><li>`add`</li><li>`update`</li><li>`remove`</li></ul> | `-p`, `--file-path` | Path to read and write config file at. Should be the path to the existing config file. | Optional. Program will try to read the current config file from `'./telemetry.yml'` if omitted. | String | `./telemetry.yml` |
+Add, update or remove npm scope
+
+Options:
+  -h, --help        display help for command
+
+Commands:
+  add [options]     Add npm scope to current config file
+  update [options]  Regenerate the npm scope
+  remove [options]  Remove npm scope from current config file
+  help [command]    display help for command
+```
+
+#### Subcommands
+
+##### Add
+
+```
+Usage: ibmtelemetry-config npm add [options]
+
+Add npm scope to current config file
+
+Options:
+  -p, --file-path <file-path>  Path to create config file at, defaults to `telemetry.yml` (default: "telemetry.yml")
+  -h, --help                   display help for command
+```
+
+##### Update
+
+```
+Usage: ibmtelemetry-config npm update [options]
+
+Regenerate the npm scope
+
+Options:
+  -p, --file-path <file-path>  Path to create config file at, defaults to `telemetry.yml` (default: "telemetry.yml")
+  -h, --help                   display help for command
+```
+
+##### Remove
+
+```
+Usage: ibmtelemetry-config npm remove [options]
+
+Remove npm scope from current config file
+
+Options:
+  -p, --file-path <file-path>  Path to create config file at, defaults to `telemetry.yml` (default: "telemetry.yml")
+  -h, --help                   display help for command
+```
 
 #### Example Usage
 
@@ -104,13 +171,62 @@ Use `npm` command along with `add`, `update` or `remove` subcommands. Remember t
 Use `jsx` command along with `add`, `update` or `remove` subcommands. Remember to supply the
 `file path` parameter if your telemetry config is not at the default location.
 
-#### Parameters
+```
+Usage: ibmtelemetry-config jsx [options] [command]
 
-| Param     | Command                                                   | Usage               | Description                                                                                                                                                                                   | Required                                                                                        | Type             | Default           |
-| --------- | --------------------------------------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ---------------- | ----------------- |
-| file path | <ul><li>`add`</li><li>`update`</li><li>`remove`</li></ul> | `-p`, `--file-path` | Path to read and write config file at. Should be the path to the existing config file.                                                                                                        | Optional. Program will try to read the current config file from `'./telemetry.yml'` if omitted. | String           | `./telemetry.yml` |
-| files     | <ul><li>`add`</li><li>`update`</li></ul>                  | `-f`, `--files`     | Files to scan component props for (used to generate `allowedAttributeNames` and `allowedAttributeStringValues` arrays in JSX scope config). Can be a space-separated list of files or a glob. | Required                                                                                        | String[], String | -                 |
-| ignore    | <ul><li>`add`</li><li>`update`</li><li>`remove`</li></ul> | `-i`, `--ignore`    | Files to ignore when scanning for JSX Scope attributes, in glob(s) form.                                                                                                                      | Optional                                                                                        | String[], String | -                 |
+Add, update or remove jsx scope
+
+Options:
+  -h, --help        display help for command
+
+Commands:
+  add [options]     Add jsx scope to current config file
+  update [options]  Regenerate the jsx scope
+  remove [options]  Remove jsx scope from current config file
+  help [command]    display help for command
+```
+
+#### Subcommands
+
+##### Add
+
+```
+Usage: ibmtelemetry-config jsx add [options]
+
+Add jsx scope to current config file
+
+Options:
+  -f, --files <files...>       List of files to scan for JSX Scope attributes, can be an array of path(s) or glob(s). Required to generate JSX scope options
+  -i, --ignore <files...>      Files to ignore when scanning for JSX Scope attributes, in glob(s) form.
+  -p, --file-path <file-path>  Path to create config file at, defaults to `telemetry.yml` (default: "telemetry.yml")
+  -h, --help                   display help for command
+```
+
+##### Update
+
+```
+Usage: ibmtelemetry-config jsx update [options]
+
+Regenerate the jsx scope
+
+Options:
+  -f, --files <files...>       List of files to scan for JSX Scope attributes, can be an array of path(s) or glob(s). Required to generate JSX scope options
+  -i, --ignore <files...>      Files to ignore when scanning for JSX Scope attributes, in glob(s) form.
+  -p, --file-path <file-path>  Path to create config file at, defaults to `telemetry.yml` (default: "telemetry.yml")
+  -h, --help                   display help for command
+```
+
+##### Remove
+
+```
+Usage: ibmtelemetry-config jsx remove [options]
+
+Remove jsx scope from current config file
+
+Options:
+  -p, --file-path <file-path>  Path to create config file at, defaults to `telemetry.yml` (default: "telemetry.yml")
+  -h, --help                   display help for command
+```
 
 #### Example Usage
 
@@ -125,11 +241,56 @@ Use `jsx` command along with `add`, `update` or `remove` subcommands. Remember t
 Use `js` command along with `add`, `update` or `remove` subcommands. Remember to supply the
 `file path` parameter if your telemetry config is not at the default location.
 
-#### Parameters
+```
+Add, update or remove js scope
 
-| Param     | Command                                                   | Usage               | Description                                                                            | Required                                                                                        | Type   | Default           |
-| --------- | --------------------------------------------------------- | ------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------ | ----------------- |
-| file path | <ul><li>`add`</li><li>`update`</li><li>`remove`</li></ul> | `-p`, `--file-path` | Path to read and write config file at. Should be the path to the existing config file. | Optional. Program will try to read the current config file from `'./telemetry.yml'` if omitted. | String | `./telemetry.yml` |
+Options:
+  -h, --help        display help for command
+
+Commands:
+  add [options]     Add js scope to current config file
+  update [options]  Regenerate the js scope
+  remove [options]  Remove js scope from current config file
+  help [command]    display help for command
+```
+
+#### Subcommands
+
+##### Add
+
+```
+Usage: ibmtelemetry-config js add [options]
+
+Add js scope to current config file
+
+Options:
+  -p, --file-path <file-path>  Path to create config file at, defaults to `telemetry.yml` (default: "telemetry.yml")
+  -h, --help                   display help for command
+```
+
+##### Update
+
+```
+Usage: ibmtelemetry-config js update [options]
+
+Regenerate the js scope
+
+Options:
+  -p, --file-path <file-path>  Path to create config file at, defaults to `telemetry.yml` (default: "telemetry.yml")
+  -h, --help                   display help for command
+```
+
+##### Remove
+
+```
+Usage: ibmtelemetry-config js remove [options]
+
+Remove js scope from current config file
+
+Options:
+  -p, --file-path <file-path>  Path to create config file at, defaults to `telemetry.yml` (default: "telemetry.yml")
+  -h, --help                   display help for command
+```
 
 #### Example Usage
 

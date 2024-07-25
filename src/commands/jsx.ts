@@ -15,11 +15,11 @@ import { writeConfigFile } from '../common/write-config-file.js'
 import { type CommandLineOptions } from '../interfaces.js'
 
 function buildJsxCommand() {
-  const jsxCommand = new Command('jsx').description('add, update or remove jsx scope')
+  const jsxCommand = new Command('jsx').description('Add, update or remove jsx scope')
 
   jsxCommand
     .command('add')
-    .description('add jsx scope to current config file')
+    .description('Add jsx scope to current config file')
     .requiredOption(
       '-f, --files <files...>',
       'List of files to scan for JSX Scope attributes, can be an array of path(s) or glob(s). Required to generate JSX scope options'
@@ -37,7 +37,7 @@ function buildJsxCommand() {
 
   jsxCommand
     .command('update')
-    .description('regenerate the jsx scope')
+    .description('Regenerate the jsx scope')
     .requiredOption(
       '-f, --files <files...>',
       'List of files to scan for JSX Scope attributes, can be an array of path(s) or glob(s). Required to generate JSX scope options'
@@ -55,7 +55,7 @@ function buildJsxCommand() {
 
   jsxCommand
     .command('remove')
-    .description('remove jsx scope from current config file')
+    .description('Remove jsx scope from current config file')
     .option(
       '-p, --file-path <file-path>',
       'Path to create config file at, defaults to `telemetry.yml`',

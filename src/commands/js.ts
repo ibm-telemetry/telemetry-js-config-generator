@@ -15,11 +15,11 @@ import { writeConfigFile } from '../common/write-config-file.js'
 import { type CommandLineOptions } from '../interfaces.js'
 
 function buildJsCommand() {
-  const jsCommand = new Command('js').description('add, update or remove js scope')
+  const jsCommand = new Command('js').description('Add, update or remove js scope')
 
   jsCommand
     .command('add')
-    .description('add js scope to current config file')
+    .description('Add js scope to current config file')
     .option(
       '-p, --file-path <file-path>',
       'Path to create config file at, defaults to `telemetry.yml`',
@@ -29,7 +29,7 @@ function buildJsCommand() {
 
   jsCommand
     .command('update')
-    .description('regenerate the js scope')
+    .description('Regenerate the js scope')
     .option(
       '-p, --file-path <file-path>',
       'Path to create config file at, defaults to `telemetry.yml`',
@@ -39,7 +39,7 @@ function buildJsCommand() {
 
   jsCommand
     .command('remove')
-    .description('remove js scope from current config file')
+    .description('Remove js scope from current config file')
     .option(
       '-p, --file-path <file-path>',
       'Path to create config file at, defaults to `telemetry.yml`',

@@ -17,7 +17,7 @@ import { type CommandLineOptions } from '../interfaces.js'
 
 function buildUpdateCommand() {
   return new Command('update')
-    .description('modify in whole or part an existing telemetry config file')
+    .description('Modify in whole or part an existing telemetry config file')
     .option('--id <project-id>', 'Project Id, should be obtained from the IBM Telemetry team')
     .option(
       '--endpoint <endpoint>',
