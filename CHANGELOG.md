@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0.2](https://github.com/ibm-telemetry/telemetry-js-config-generator/compare/v2.0.1...v2.0.2) (2024-07-29)
+
+
+### Bug Fixes
+
+* **deps:** upgrade dependency yaml to ^2.5.0 ([#57](https://github.com/ibm-telemetry/telemetry-js-config-generator/issues/57)) ([abe87a7](https://github.com/ibm-telemetry/telemetry-js-config-generator/commit/abe87a7ef08957a8a7dccc663ba571e8a6b67935))
+* **deps:** upgrade devDependencies (minor) ([#56](https://github.com/ibm-telemetry/telemetry-js-config-generator/issues/56)) ([c6b35f5](https://github.com/ibm-telemetry/telemetry-js-config-generator/commit/c6b35f5fe274d122c91269925b49228903c213e3))
+
 ## [2.0.1](https://github.com/ibm-telemetry/telemetry-js-config-generator/compare/v2.0.0...v2.0.1) (2024-07-25)
 
 
