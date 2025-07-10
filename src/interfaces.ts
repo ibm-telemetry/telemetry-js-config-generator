@@ -12,6 +12,7 @@ export interface CommandLineOptions {
   npm: boolean
   jsx: boolean
   js: boolean
+  wc: boolean
   ignore?: string[]
 }
 
@@ -57,4 +58,4 @@ export interface CompData {
 
 export type CompPropTypes = Record<string, Record<string, string[]>>
 
-export type TelemetryScope = 'jsx' | 'js' | 'npm'
+export type TelemetryScope = 'jsx' | 'js' | 'npm' | 'wc'

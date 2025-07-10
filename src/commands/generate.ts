@@ -12,6 +12,7 @@ import yaml from 'yaml'
 import { getJsScopeConfig } from '../common/get-js-scope-config.js'
 import { getJsxScopeConfig } from '../common/get-jsx-scope-config.js'
 import { getNpmScopeConfig } from '../common/get-npm-scope-config.js'
+import { getWcScopeConfig } from '../common/get-wc-scope-config.js'
 import { writeConfigFile } from '../common/write-config-file.js'
 import { type CommandLineOptions } from '../interfaces.js'
 
@@ -42,6 +43,7 @@ function buildGenerateCommand() {
     .option('--no-npm', 'Disables config generation for npm scope')
     .option('--no-jsx', 'Disables config generation for JSX scope')
     .option('--no-js', 'Disables config generation for JS scope')
+    .option('--no-wc', 'Disables config generation for Web Component scope')
     .action(generateConfigFile)
 }
 
@@ -82,6 +84,10 @@ async function generateConfigFile(opts: CommandLineOptions) {
 
   if (opts.js) {
     collect['js'] = getJsScopeConfig()
+  }
+
+  if (opts.wc) {
+    collect['wc'] = getWcScopeConfig()
   }
 
   doc.set('collect', collect)

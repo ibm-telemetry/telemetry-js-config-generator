@@ -12,6 +12,7 @@ import { readConfigFile } from '../common/read-config-file.js'
 import { updateJsConfig } from '../common/update-js-config.js'
 import { updateJsxConfig } from '../common/update-jsx-config.js'
 import { updateNpmConfig } from '../common/update-npm-config.js'
+import { updateWcConfig } from '../common/update-wc-config.js'
 import { writeConfigFile } from '../common/write-config-file.js'
 import { type CommandLineOptions } from '../interfaces.js'
 
@@ -39,6 +40,7 @@ function buildUpdateCommand() {
     .option('--no-npm', 'Disables config generation for npm scope')
     .option('--no-jsx', 'Disables config generation for JSX scope')
     .option('--no-js', 'Disables config generation for JS scope')
+    .option('--no-wc', 'Disables config generation for Web Component scope')
     .action((opts) => updateConfigFile(opts))
 }
 
@@ -75,6 +77,10 @@ async function updateConfigFile(
     } else {
       await updateJsxConfig(collectNode, opts.files, opts.ignore, configFile)
     }
+  }
+
+  if (opts.wc && collectNode.get('wc') !== undefined) {
+    updateWcConfig(collectNode)
   }
 
   if (opts.id !== null && opts.id !== undefined) {
