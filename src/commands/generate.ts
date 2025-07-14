@@ -27,23 +27,23 @@ function buildGenerateCommand() {
       '--endpoint <endpoint>',
       'URL of an OpenTelemetry-compatible metrics collector API endpoint. Used to post collected telemetry data to.'
     )
+    .requiredOption(
+      '--scopes <scopes..>',
+      'List of scopes to include in config generation. Valid scopes are "js", "jsx", "npm", and "wc". "jsx" and "wc" cannot be included together.'
+    )
     .option(
       '-f, --files <files...>',
-      'List of files to scan for JSX Scope attributes, can be an array of path(s) or glob(s). Required to generate JSX scope options'
+      'List of files to scan for component attributes. Can be an array of path(s) or glob(s). Required for JSX and Web Component scopes.'
     )
     .option(
       '-i, --ignore <files...>',
-      'Files to ignore when scanning for JSX Scope attributes, in glob(s) form.'
+      'Files to ignore when scanning for component attributes, in glob(s) form.'
     )
     .option(
       '-p, --file-path <file-path>',
       'Path to create config file at, defaults to `telemetry.yml`',
       'telemetry.yml'
     )
-    .option('--no-npm', 'Disables config generation for npm scope')
-    .option('--no-jsx', 'Disables config generation for JSX scope')
-    .option('--no-js', 'Disables config generation for JS scope')
-    .option('--no-wc', 'Disables config generation for Web Component scope')
     .action(generateConfigFile)
 }
 
@@ -53,8 +53,25 @@ function buildGenerateCommand() {
  * @param opts - The command line options provided when the command was executed.
  */
 async function generateConfigFile(opts: CommandLineOptions) {
-  if (opts.jsx && !opts.files) {
+  const jsScope = opts.scopes?.includes('js')
+  const jsxScope = opts.scopes?.includes('jsx')
+  const npmScope = opts.scopes?.includes('npm')
+  const wcScope = opts.scopes?.includes('wc')
+
+  if (jsxScope && wcScope) {
+    throw new InvalidArgumentError(
+      'JSX and Web Component scopes cannot be included together in config generation'
+    )
+  }
+
+  if (jsxScope && !opts.files) {
     throw new InvalidArgumentError('--files argument must be specified for JSX scope generation')
+  }
+
+  if (wcScope && !opts.files) {
+    throw new InvalidArgumentError(
+      '--files argument must be specified for Web Component scope generation'
+    )
   }
 
   const doc = new yaml.Document({
@@ -71,23 +88,26 @@ async function generateConfigFile(opts: CommandLineOptions) {
   // as yaml.Node array to be able to preserve comments
   const collect: Record<string, unknown> = {}
 
-  if (opts.jsx && opts.files) {
+  if (jsxScope && opts.files) {
     const jsxContents = await getJsxScopeConfig(opts.files, opts.ignore, doc)
     if (jsxContents !== null) {
       collect['jsx'] = jsxContents
     }
   }
 
-  if (opts.npm) {
+  if (wcScope && opts.files) {
+    const wcContents = await getWcScopeConfig(opts.files, opts.ignore, doc)
+    if (wcContents !== null) {
+      collect['wc'] = wcContents
+    }
+  }
+
+  if (npmScope) {
     collect['npm'] = getNpmScopeConfig()
   }
 
-  if (opts.js) {
+  if (jsScope) {
     collect['js'] = getJsScopeConfig()
-  }
-
-  if (opts.wc) {
-    collect['wc'] = getWcScopeConfig()
   }
 
   doc.set('collect', collect)

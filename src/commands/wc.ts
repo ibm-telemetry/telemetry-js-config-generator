@@ -15,14 +15,14 @@ import { writeConfigFile } from '../common/write-config-file.js'
 import { type CommandLineOptions } from '../interfaces.js'
 
 function buildWcCommand() {
-  const wcCommand = new Command('wc').description('Add, update or remove Web Component scope')
+  const wcCommand = new Command('wc').description('Add, update or remove web component scope')
 
   wcCommand
     .command('add')
-    .description('Add Web Component scope to current config file')
+    .description('Add web component scope to current config file')
     .requiredOption(
       '-f, --files <files...>',
-      `List of files to scan for Web Component scope attributes, can be an array of path(s) or glob(s). Required to generate Web Component scope 
+      `List of files to scan for web component scope attributes, can be an array of path(s) or glob(s). Required to generate Web Component scope 
       options`
     )
     .option(
@@ -38,7 +38,7 @@ function buildWcCommand() {
 
   wcCommand
     .command('update')
-    .description('Regenerate the Web Component scope')
+    .description('Regenerate the web component scope')
     .requiredOption(
       '-f, --files <files...>',
       `List of files to scan for Web Component scope attributes, can be an array of path(s) or glob(s). Required to generate Web Component scope 
@@ -57,7 +57,7 @@ function buildWcCommand() {
 
   wcCommand
     .command('remove')
-    .description('Remove Web Component scope from current config file')
+    .description('Remove web component scope from current config file')
     .option(
       '-p, --file-path <file-path>',
       'Path to create config file at, defaults to `telemetry.yml`',

@@ -5,14 +5,11 @@
  * LICENSE file in the root directory of this source tree.
  */
 export interface CommandLineOptions {
-  files?: string[]
   id: string
   endpoint: string
   filePath: string
-  npm: boolean
-  jsx: boolean
-  js: boolean
-  wc: boolean
+  scopes: string[]
+  files?: string[]
   ignore?: string[]
 }
 

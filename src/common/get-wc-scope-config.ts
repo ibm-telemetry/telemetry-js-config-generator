@@ -10,7 +10,7 @@
  *
  * @returns Correct Web Component (default) scope configuration.
  */
-export function getWcScopeConfig() {
+export async function getWcScopeConfig() {
   return {
     functions: {},
     tokens: null
