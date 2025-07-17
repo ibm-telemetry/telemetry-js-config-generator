@@ -28,7 +28,7 @@ function buildGenerateCommand() {
       'URL of an OpenTelemetry-compatible metrics collector API endpoint. Used to post collected telemetry data to.'
     )
     .requiredOption(
-      '--scopes <scopes..>',
+      '--scopes <scopes...>',
       'List of scopes to include in config generation. Valid scopes are "js", "jsx", "npm", and "wc". "jsx" and "wc" cannot be included together.'
     )
     .option(

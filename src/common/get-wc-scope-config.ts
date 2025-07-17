@@ -103,8 +103,6 @@ function getAttributeValues(attributeData: AttributeData): string[] {
   const values: string[] = []
   if (attributeData.values) {
     attributeData.values.forEach((val: AttributeValue) => values.push(val.name))
-  } else if (attributeData.valueSet === 'v') {
-    values.push('true', 'false')
   }
   return values
 }
@@ -259,6 +257,10 @@ async function getAttributeNameAndValues(
       })
     })
 
+    // add boolean attribute values
+    const booleanTrueNode = doc.createNode('true')
+    booleanTrueNode.commentBefore = ' General - boolean attributes'
+    values.unshift(booleanTrueNode, 'false')
     return [names, values]
   } catch (e) {
     console.error('Error parsing output json data: ', e)
