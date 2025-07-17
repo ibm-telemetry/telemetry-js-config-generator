@@ -8,9 +8,12 @@ export interface CommandLineOptions {
   id: string
   endpoint: string
   filePath: string
-  scopes: string[]
   files?: string[]
   ignore?: string[]
+  npm: boolean
+  jsx: boolean
+  js: boolean
+  wc: boolean
 }
 
 export type TelemetryScope = 'jsx' | 'js' | 'npm' | 'wc'

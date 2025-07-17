@@ -6,7 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { Command } from 'commander'
+import { Command, InvalidArgumentError } from 'commander'
 
 import { readConfigFile } from '../common/read-config-file.js'
 import { updateJsConfig } from '../common/update-js-config.js'
@@ -19,10 +19,6 @@ import { type CommandLineOptions } from '../interfaces.js'
 function buildUpdateCommand() {
   return new Command('update')
     .description('Modify in whole or part an existing telemetry config file')
-    .requiredOption(
-      '--scopes <scopes..>',
-      'List of scopes to include in config generation. Valid scopes are "js", "jsx", "npm", and "wc". "jsx" and "wc" cannot be included together.'
-    )
     .option('--id <project-id>', 'Project Id, should be obtained from the IBM Telemetry team')
     .option(
       '--endpoint <endpoint>',
@@ -41,6 +37,13 @@ function buildUpdateCommand() {
       'Path to create config file at, defaults to `telemetry.yml`',
       'telemetry.yml'
     )
+    .option('--no-npm', 'Disables config generation for npm scope')
+    .option('--no-jsx', 'Disables config generation for JSX scope')
+    .option('--no-js', 'Disables config generation for JS scope')
+    .option(
+      '--wc',
+      'Includes Web Component scope in config generation. Requires JSX scope to be disabled with --no-jsx'
+    )
     .action((opts) => updateConfigFile(opts))
 }
 
@@ -53,10 +56,6 @@ async function updateConfigFile(
   opts: Partial<CommandLineOptions> & Pick<CommandLineOptions, 'filePath'>
 ) {
   const configFile = readConfigFile(opts.filePath)
-  const jsScope = opts.scopes?.includes('js')
-  const jsxScope = opts.scopes?.includes('jsx')
-  const npmScope = opts.scopes?.includes('npm')
-  const wcScope = opts.scopes?.includes('wc')
 
   // get returns unknown and can't figure out what the type cast is supposed to be
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- unsure what the type cast is
@@ -67,15 +66,21 @@ async function updateConfigFile(
     return
   }
 
-  if (npmScope && collectNode.get('npm') !== undefined) {
+  if (opts.jsx && opts.wc) {
+    throw new InvalidArgumentError(
+      'JSX scope must be disabled with --no-jsx to include Web Component scope in config generation'
+    )
+  }
+
+  if (opts.npm && collectNode.get('npm') !== undefined) {
     updateNpmConfig(collectNode)
   }
 
-  if (jsScope && collectNode.get('js') !== undefined) {
+  if (opts.js && collectNode.get('js') !== undefined) {
     updateJsConfig(collectNode)
   }
 
-  if (jsxScope && collectNode.get('jsx') !== undefined) {
+  if (opts.jsx && collectNode.get('jsx') !== undefined) {
     if (!opts.files) {
       console.warn('Warning: skipping JSX scope regeneration, --files argument not set')
     } else {
@@ -83,7 +88,7 @@ async function updateConfigFile(
     }
   }
 
-  if (wcScope && collectNode.get('wc') !== undefined) {
+  if (opts.wc && collectNode.get('wc') !== undefined) {
     if (!opts.files) {
       console.warn('Warning: skipping Web Component scope regeneration, --files argument not set')
     } else {
