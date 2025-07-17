@@ -13,6 +13,10 @@ export interface CommandLineOptions {
   ignore?: string[]
 }
 
+export type TelemetryScope = 'jsx' | 'js' | 'npm' | 'wc'
+
+// JSX Scope
+
 export interface EnumValue {
   value: string
   computed: boolean
@@ -55,4 +59,25 @@ export interface CompData {
 
 export type CompPropTypes = Record<string, Record<string, string[]>>
 
-export type TelemetryScope = 'jsx' | 'js' | 'npm' | 'wc'
+// Web Component Scope
+
+export interface AttributeValue {
+  name: string
+}
+
+export interface AttributeData {
+  name: string
+  valueSet?: string
+  values?: AttributeValue[]
+}
+
+export interface WebCompData {
+  name: string
+  attributes?: AttributeData[]
+}
+
+export interface WcaOutput {
+  tags: WebCompData[]
+}
+
+export type WebCompAttributes = Record<string, Record<string, string[]>>

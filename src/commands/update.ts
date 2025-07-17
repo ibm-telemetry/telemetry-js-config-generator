@@ -19,6 +19,10 @@ import { type CommandLineOptions } from '../interfaces.js'
 function buildUpdateCommand() {
   return new Command('update')
     .description('Modify in whole or part an existing telemetry config file')
+    .requiredOption(
+      '--scopes <scopes..>',
+      'List of scopes to include in config generation. Valid scopes are "js", "jsx", "npm", and "wc". "jsx" and "wc" cannot be included together.'
+    )
     .option('--id <project-id>', 'Project Id, should be obtained from the IBM Telemetry team')
     .option(
       '--endpoint <endpoint>',
@@ -26,7 +30,7 @@ function buildUpdateCommand() {
     )
     .option(
       '-f, --files <files...>',
-      'List of files to scan for JSX Scope attributes, can be an array of path(s) or glob(s). Required to generate JSX scope options'
+      'Files to scan for component attributes. Can be an array of path(s) or glob(s). Required for JSX and Web Component scopes.'
     )
     .option(
       '-i, --ignore <files...>',
@@ -37,10 +41,6 @@ function buildUpdateCommand() {
       'Path to create config file at, defaults to `telemetry.yml`',
       'telemetry.yml'
     )
-    .option('--no-npm', 'Disables config generation for npm scope')
-    .option('--no-jsx', 'Disables config generation for JSX scope')
-    .option('--no-js', 'Disables config generation for JS scope')
-    .option('--no-wc', 'Disables config generation for Web Component scope')
     .action((opts) => updateConfigFile(opts))
 }
 
@@ -53,6 +53,10 @@ async function updateConfigFile(
   opts: Partial<CommandLineOptions> & Pick<CommandLineOptions, 'filePath'>
 ) {
   const configFile = readConfigFile(opts.filePath)
+  const jsScope = opts.scopes?.includes('js')
+  const jsxScope = opts.scopes?.includes('jsx')
+  const npmScope = opts.scopes?.includes('npm')
+  const wcScope = opts.scopes?.includes('wc')
 
   // get returns unknown and can't figure out what the type cast is supposed to be
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- unsure what the type cast is
@@ -63,15 +67,15 @@ async function updateConfigFile(
     return
   }
 
-  if (opts.npm && collectNode.get('npm') !== undefined) {
+  if (npmScope && collectNode.get('npm') !== undefined) {
     updateNpmConfig(collectNode)
   }
 
-  if (opts.js && collectNode.get('js') !== undefined) {
+  if (jsScope && collectNode.get('js') !== undefined) {
     updateJsConfig(collectNode)
   }
 
-  if (opts.jsx && collectNode.get('jsx') !== undefined) {
+  if (jsxScope && collectNode.get('jsx') !== undefined) {
     if (!opts.files) {
       console.warn('Warning: skipping JSX scope regeneration, --files argument not set')
     } else {
@@ -79,8 +83,12 @@ async function updateConfigFile(
     }
   }
 
-  if (opts.wc && collectNode.get('wc') !== undefined) {
-    updateWcConfig(collectNode)
+  if (wcScope && collectNode.get('wc') !== undefined) {
+    if (!opts.files) {
+      console.warn('Warning: skipping Web Component scope regeneration, --files argument not set')
+    } else {
+      await updateWcConfig(collectNode, opts.files, configFile)
+    }
   }
 
   if (opts.id !== null && opts.id !== undefined) {

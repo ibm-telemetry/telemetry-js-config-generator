@@ -22,12 +22,7 @@ function buildWcCommand() {
     .description('Add web component scope to current config file')
     .requiredOption(
       '-f, --files <files...>',
-      `List of files to scan for web component scope attributes, can be an array of path(s) or glob(s). Required to generate Web Component scope 
-      options`
-    )
-    .option(
-      '-i, --ignore <files...>',
-      'Files to ignore when scanning for Web Component scope attributes, in glob(s) form.'
+      'Files to scan for Web Component attributes, can be an array of path(s) or glob(s). Required to generate Web Component scope options'
     )
     .option(
       '-p, --file-path <file-path>',
@@ -41,12 +36,7 @@ function buildWcCommand() {
     .description('Regenerate the web component scope')
     .requiredOption(
       '-f, --files <files...>',
-      `List of files to scan for Web Component scope attributes, can be an array of path(s) or glob(s). Required to generate Web Component scope 
-      options`
-    )
-    .option(
-      '-i, --ignore <files...>',
-      'Files to ignore when scanning for Web Component scope attributes, in glob(s) form.'
+      'Files to scan for Web Component attributes, can be an array of path(s) or glob(s). Required to generate Web Component scope options'
     )
     .option(
       '-p, --file-path <file-path>',
@@ -93,7 +83,7 @@ async function updateWcConfigInFile(
     return
   }
 
-  await updateWcConfig(collectNode)
+  await updateWcConfig(collectNode, opts.files, configFile)
 
   configFile.set('collect', collectNode)
 

@@ -33,11 +33,11 @@ function buildGenerateCommand() {
     )
     .option(
       '-f, --files <files...>',
-      'List of files to scan for component attributes. Can be an array of path(s) or glob(s). Required for JSX and Web Component scopes.'
+      'Files to scan for component attributes. Can be an array of path(s) or glob(s). Required for JSX and Web Component scopes.'
     )
     .option(
       '-i, --ignore <files...>',
-      'Files to ignore when scanning for component attributes, in glob(s) form.'
+      'Files to ignore when scanning for JSX Scope attributes, in glob(s) form.'
     )
     .option(
       '-p, --file-path <file-path>',
@@ -96,7 +96,7 @@ async function generateConfigFile(opts: CommandLineOptions) {
   }
 
   if (wcScope && opts.files) {
-    const wcContents = await getWcScopeConfig(opts.files, opts.ignore, doc)
+    const wcContents = await getWcScopeConfig(opts.files, doc)
     if (wcContents !== null) {
       collect['wc'] = wcContents
     }
