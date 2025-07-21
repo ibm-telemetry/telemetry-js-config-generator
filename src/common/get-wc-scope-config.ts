@@ -69,9 +69,8 @@ async function generateComponentData(files: string[]): Promise<string> {
   return await new Promise<string>((resolve, reject) => {
     const proc = childProcess.spawn(
       // eslint-disable-next-line max-len -- long command
-      `npx web-component-analyzer analyze ${files.join(
-        ' '
-      )} --format vscode --outFile ${outputFilePath}`,
+      `npx web-component-analyzer analyze  --format vscode --outFile ${outputFilePath}`,
+      files,
       { shell: true }
     )
 
