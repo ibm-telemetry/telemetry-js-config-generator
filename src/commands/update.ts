@@ -48,6 +48,92 @@ function buildUpdateCommand() {
 }
 
 /**
+ * Check that the given `collect` node has an existing JS scope configuration and update it.
+ *
+ * @param collectNode - Collect node extracted from a yaml.Document containing
+ * an existing telemetry configuration.
+ */
+function handleJsScope(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- unsure what the type cast is
+  collectNode: any
+) {
+  if (collectNode.get('js') !== undefined) {
+    updateJsConfig(collectNode)
+  }
+}
+
+/**
+ * Check that the given `collect` node has an existing NPM scope configuration and update it.
+ *
+ * @param collectNode - Collect node extracted from a yaml.Document containing
+ * an existing telemetry configuration.
+ */
+function handleNpmScope(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- unsure what the type cast is
+  collectNode: any
+) {
+  if (collectNode.get('npm') !== undefined) {
+    updateNpmConfig(collectNode)
+  }
+}
+
+/**
+ * Check that the given options and `collect` node meet the criteria for updating the WC scope.
+ * Then update the WC scope configuration.
+ *
+ * @param collectNode - Collect node extracted from a yaml.Document containing
+ * an existing telemetry configuration.
+ * @param configFile - The telemetry configuration file to be updated.
+ * @param opts - The command line options provided when the command was executed.
+ */
+async function handleWcScope(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- unsure what the type cast is
+  collectNode: any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- unsure what the type cast is
+  configFile: any,
+  opts: Partial<CommandLineOptions> & Pick<CommandLineOptions, 'filePath'>
+) {
+  if (opts.jsx) {
+    throw new InvalidArgumentError(
+      'JSX scope must be disabled with --no-jsx to include Web Component scope in config generation'
+    )
+  }
+
+  if (collectNode.get('wc') !== undefined) {
+    if (!opts.files) {
+      console.warn('Warning: skipping Web Component scope regeneration, --files argument not set')
+    } else {
+      await updateWcConfig(collectNode, opts.files, configFile)
+    }
+  }
+}
+
+/**
+ * Check that the given options and `collect` node meet the criteria for updating the JSX scope.
+ * Then update the JSX scope configuration.
+ *
+ * @param collectNode - Collect node extracted from a yaml.Document containing
+ * an existing telemetry configuration.
+ * @param configFile - The telemetry configuration file to be updated.
+ * @param opts - The command line options provided when the command was executed.
+ */
+async function handleJsxScope(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- unsure what the type cast is
+  collectNode: any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- unsure what the type cast is
+  configFile: any,
+  opts: Partial<CommandLineOptions> & Pick<CommandLineOptions, 'filePath'>
+) {
+  if (collectNode.get('jsx') !== undefined) {
+    if (!opts.files) {
+      console.warn('Warning: skipping JSX scope regeneration, --files argument not set')
+    } else {
+      await updateJsxConfig(collectNode, opts.files, opts.ignore, configFile)
+    }
+  }
+}
+
+/**
  * Regenerates in part of whole a telemetry configuration within an existing config file.
  *
  * @param opts - The command line options provided when the command was executed.
@@ -66,34 +152,20 @@ async function updateConfigFile(
     return
   }
 
-  if (opts.jsx && opts.wc) {
-    throw new InvalidArgumentError(
-      'JSX scope must be disabled with --no-jsx to include Web Component scope in config generation'
-    )
+  if (opts.js) {
+    handleJsScope(collectNode)
   }
 
-  if (opts.npm && collectNode.get('npm') !== undefined) {
-    updateNpmConfig(collectNode)
+  if (opts.npm) {
+    handleNpmScope(collectNode)
   }
 
-  if (opts.js && collectNode.get('js') !== undefined) {
-    updateJsConfig(collectNode)
+  if (opts.wc) {
+    await handleWcScope(collectNode, configFile, opts)
   }
 
-  if (opts.jsx && collectNode.get('jsx') !== undefined) {
-    if (!opts.files) {
-      console.warn('Warning: skipping JSX scope regeneration, --files argument not set')
-    } else {
-      await updateJsxConfig(collectNode, opts.files, opts.ignore, configFile)
-    }
-  }
-
-  if (opts.wc && collectNode.get('wc') !== undefined) {
-    if (!opts.files) {
-      console.warn('Warning: skipping Web Component scope regeneration, --files argument not set')
-    } else {
-      await updateWcConfig(collectNode, opts.files, configFile)
-    }
+  if (opts.jsx) {
+    await handleJsxScope(collectNode, configFile, opts)
   }
 
   if (opts.id !== null && opts.id !== undefined) {
