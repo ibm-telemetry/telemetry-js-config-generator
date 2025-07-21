@@ -11,15 +11,17 @@ import { tmpNameSync } from 'tmp-promise'
 import yaml, { type Node } from 'yaml'
 
 import {
-  AttributeValue,
   AttributeData,
-  WebCompData,
+  AttributeValue,
   WcaOutput,
-  WebCompAttributes
+  WebCompAttributes,
+  WebCompData
 } from '../interfaces.js'
 
 /**
- * Creates a project-specific Web Component scope configuration to be placed inside telemetry config file.
+ * Creates a project-specific Web Component scope configuration to be placed inside telemetry
+ * config file.
+ *
  * @param files - List of files to scan for Web Component Scope attributes,
  * can be an array of path(s) or glob(s).
  * @param doc - Yaml.document object containing current configuration.

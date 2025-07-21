@@ -62,13 +62,9 @@ async function generateConfigFile(opts: CommandLineOptions) {
     )
   }
 
-  if (opts.jsx && !opts.files) {
-    throw new InvalidArgumentError('--files argument must be specified for JSX scope generation')
-  }
-
-  if (opts.wc && !opts.files) {
+  if ((opts.jsx || opts.wc) && !opts.files) {
     throw new InvalidArgumentError(
-      '--files argument must be specified for Web Component scope generation'
+      '--files argument must be specified for JSX and Web Component scope generation'
     )
   }
 
