@@ -81,7 +81,7 @@ async function generateComponentData(files: string[]): Promise<string> {
 
     proc.on('error', (err) => {
       console.error('Error: ', err)
-      reject(err)
+      reject(err as Error)
     })
 
     proc.on('close', (exitCode) => {
@@ -160,15 +160,28 @@ function groupGeneralAttributes(webCompAttributes: WebCompAttributes) {
     ...webCompAttributes
   }
 
+  /**
+   * Helper function that checks if a given attribute exists in another component than the one
+   * provided.
+   *
+   * @param component - Name of the component that has the provided attribute.
+   * @param attr - The attribute name to check for duplicates.
+   * @returns Boolean value representing whether the attribute has at least one duplicate.
+   */
+  function checkDuplicates(component: string, attr: string) {
+    if (general[attr] !== undefined) {
+      return true
+    }
+    return Object.entries(allCompAttributes).some(
+      ([duplKey, duplValue]) =>
+        duplKey !== component && Object.keys(duplValue).some((duplAttr) => duplAttr === attr)
+    )
+  }
+
   // Compute General Attributes
   Object.entries(webCompAttributes).forEach(([key, value]) => {
     Object.keys(value).forEach((attr) => {
-      const hasDuplicate: boolean =
-        general[attr] !== undefined ||
-        Object.entries(allCompAttributes).some(
-          ([duplKey, duplValue]) =>
-            duplKey !== key && Object.keys(duplValue).some((duplAttr) => duplAttr === attr)
-        )
+      const hasDuplicate: boolean = checkDuplicates(key, attr)
       if (hasDuplicate) {
         const generalAttribute = general[attr]
         if (generalAttribute) {
