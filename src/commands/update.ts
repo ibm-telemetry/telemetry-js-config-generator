@@ -6,7 +6,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { Command, InvalidArgumentError } from 'commander'
+import { Command } from 'commander'
 
 import { readConfigFile } from '../common/read-config-file.js'
 import { updateJsConfig } from '../common/update-js-config.js'
@@ -42,7 +42,7 @@ function buildUpdateCommand() {
     .option('--no-js', 'Disables config generation for JS scope')
     .option(
       '--wc',
-      'Includes Web Component scope in config generation. Requires JSX scope to be disabled with --no-jsx'
+      'Includes Web Component scope in config generation. Disables config generation for JSX scope.'
     )
     .action((opts) => updateConfigFile(opts))
 }
@@ -93,12 +93,6 @@ async function handleWcScope(
   configFile: any,
   opts: Partial<CommandLineOptions> & Pick<CommandLineOptions, 'filePath'>
 ) {
-  if (opts.jsx) {
-    throw new InvalidArgumentError(
-      'JSX scope must be disabled with --no-jsx to include Web Component scope in config generation'
-    )
-  }
-
   if (collectNode.get('wc') !== undefined) {
     if (!opts.files) {
       console.warn('Warning: skipping Web Component scope regeneration, --files argument not set')
@@ -161,6 +155,7 @@ async function updateConfigFile(
   }
 
   if (opts.wc) {
+    opts.jsx = false
     await handleWcScope(collectNode, configFile, opts)
   }
 

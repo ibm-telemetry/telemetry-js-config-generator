@@ -45,7 +45,7 @@ function buildGenerateCommand() {
     .option('--no-js', 'Disables config generation for JS scope')
     .option(
       '--wc',
-      'Includes Web Component scope in config generation. Requires JSX scope to be disabled with --no-jsx'
+      'Includes Web Component scope in config generation. Disables config generation for JSX scope.'
     )
     .action(generateConfigFile)
 }
@@ -56,10 +56,8 @@ function buildGenerateCommand() {
  * @param opts - The command line options provided when the command was executed.
  */
 async function generateConfigFile(opts: CommandLineOptions) {
-  if (opts.jsx && opts.wc) {
-    throw new InvalidArgumentError(
-      'JSX scope must be disabled with --no-jsx to include Web Component scope in config generation'
-    )
+  if (opts.wc) {
+    opts.jsx = false
   }
 
   if ((opts.jsx || opts.wc) && !opts.files) {
