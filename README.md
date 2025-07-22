@@ -57,10 +57,10 @@ Generate IBM telemetry config file.
 Options:
   --id <project-id>            Project Id, should be obtained from the IBM Telemetry team
   --endpoint <endpoint>        URL of an OpenTelemetry-compatible metrics collector API endpoint. Used to post collected telemetry data to.
-  -f, --files <files...>       Files to scan for component attributes. Can be an array of path(s) or glob(s). Required for JSX and Web Component scopes.
+  -f, --files <files...>       Files to scan for component attributes. Can be an array of path(s) or glob(s). Required for JSX and Web Component scope options.
   -i, --ignore <files...>      Files to ignore when scanning for JSX Scope attributes, in glob(s) form.
   -p, --file-path <file-path>  Path to create config file at, defaults to `telemetry.yml` (default: "telemetry.yml")
-  --wc                         Includes Web Component scope in config generation. Requires JSX scope to be disabled with `--no-jsx`.
+  --wc                         Includes Web Component scope in config generation. Disables config generation for JSX scope.
   --no-npm                     Disables config generation for npm scope
   --no-jsx                     Disables config generation for JSX scope
   --no-js                      Disables config generation for JS scope
@@ -87,10 +87,10 @@ Modify in whole or part an existing telemetry config file
 Options:
   --id <project-id>            Project Id, should be obtained from the IBM Telemetry team
   --endpoint <endpoint>        URL of an OpenTelemetry-compatible metrics collector API endpoint. Used to post collected telemetry data to.
-  -f, --files <files...>       Files to scan for component attributes. Can be an array of path(s) or glob(s). Required for JSX and Web Component scopes.
+  -f, --files <files...>       Files to scan for component attributes. Can be an array of path(s) or glob(s). Required for JSX and Web Component scope options.
   -i, --ignore <files...>      Files to ignore when scanning for JSX Scope attributes, in glob(s) form.
   -p, --file-path <file-path>  Path to create config file at, defaults to `telemetry.yml` (default: "telemetry.yml")
-  --wc                         Includes Web Component scope in config generation. Requires JSX scope to be disabled with `--no-jsx`.
+  --wc                         Includes Web Component scope in config generation. Disables config generation for JSX scope.
   --no-npm                     Disables config generation for npm scope
   --no-jsx                     Disables config generation for JSX scope
   --no-js                      Disables config generation for JS scope
