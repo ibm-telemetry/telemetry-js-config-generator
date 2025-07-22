@@ -12,6 +12,7 @@ import yaml from 'yaml'
 import { getJsScopeConfig } from '../common/get-js-scope-config.js'
 import { getJsxScopeConfig } from '../common/get-jsx-scope-config.js'
 import { getNpmScopeConfig } from '../common/get-npm-scope-config.js'
+import { getWcScopeConfig } from '../common/get-wc-scope-config.js'
 import { writeConfigFile } from '../common/write-config-file.js'
 import { type CommandLineOptions } from '../interfaces.js'
 
@@ -28,7 +29,7 @@ function buildGenerateCommand() {
     )
     .option(
       '-f, --files <files...>',
-      'List of files to scan for JSX Scope attributes, can be an array of path(s) or glob(s). Required to generate JSX scope options'
+      'Files to scan for component attributes. Can be an array of path(s) or glob(s). Required for JSX and Web Component scopes.'
     )
     .option(
       '-i, --ignore <files...>',
@@ -42,6 +43,10 @@ function buildGenerateCommand() {
     .option('--no-npm', 'Disables config generation for npm scope')
     .option('--no-jsx', 'Disables config generation for JSX scope')
     .option('--no-js', 'Disables config generation for JS scope')
+    .option(
+      '--wc',
+      'Includes Web Component scope in config generation. Disables config generation for JSX scope.'
+    )
     .action(generateConfigFile)
 }
 
@@ -51,8 +56,14 @@ function buildGenerateCommand() {
  * @param opts - The command line options provided when the command was executed.
  */
 async function generateConfigFile(opts: CommandLineOptions) {
-  if (opts.jsx && !opts.files) {
-    throw new InvalidArgumentError('--files argument must be specified for JSX scope generation')
+  if (opts.wc) {
+    opts.jsx = false
+  }
+
+  if ((opts.jsx || opts.wc) && !opts.files) {
+    throw new InvalidArgumentError(
+      '--files argument must be specified for JSX and Web Component scope generation'
+    )
   }
 
   const doc = new yaml.Document({
@@ -73,6 +84,13 @@ async function generateConfigFile(opts: CommandLineOptions) {
     const jsxContents = await getJsxScopeConfig(opts.files, opts.ignore, doc)
     if (jsxContents !== null) {
       collect['jsx'] = jsxContents
+    }
+  }
+
+  if (opts.wc && opts.files) {
+    const wcContents = await getWcScopeConfig(opts.files, doc)
+    if (wcContents !== null) {
+      collect['wc'] = wcContents
     }
   }
 

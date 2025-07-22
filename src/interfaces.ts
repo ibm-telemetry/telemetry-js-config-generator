@@ -5,15 +5,20 @@
  * LICENSE file in the root directory of this source tree.
  */
 export interface CommandLineOptions {
-  files?: string[]
   id: string
   endpoint: string
   filePath: string
+  files?: string[]
+  ignore?: string[]
   npm: boolean
   jsx: boolean
   js: boolean
-  ignore?: string[]
+  wc: boolean
 }
+
+export type TelemetryScope = 'jsx' | 'js' | 'npm' | 'wc'
+
+// JSX Scope
 
 export interface EnumValue {
   value: string
@@ -57,4 +62,25 @@ export interface CompData {
 
 export type CompPropTypes = Record<string, Record<string, string[]>>
 
-export type TelemetryScope = 'jsx' | 'js' | 'npm'
+// Web Component Scope
+
+export interface AttributeValue {
+  name: string
+}
+
+export interface AttributeData {
+  name: string
+  valueSet?: string
+  values?: AttributeValue[]
+}
+
+export interface WebCompData {
+  name: string
+  attributes?: AttributeData[]
+}
+
+export interface WcaOutput {
+  tags: WebCompData[]
+}
+
+export type WebCompAttributes = Record<string, Record<string, string[]>>

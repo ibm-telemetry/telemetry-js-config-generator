@@ -24,7 +24,8 @@ Commands:
   update [options]    Modify in whole or part an existing telemetry config file
   npm                 Add, update or remove npm scope
   js                  Add, update or remove js scope
-  jsx                 Sdd, update or remove jsx scope
+  jsx                 Add, update or remove jsx scope
+  wc                  Add, update or remove web component scope
   help [command]      display help for command
 ```
 
@@ -56,9 +57,10 @@ Generate IBM telemetry config file.
 Options:
   --id <project-id>            Project Id, should be obtained from the IBM Telemetry team
   --endpoint <endpoint>        URL of an OpenTelemetry-compatible metrics collector API endpoint. Used to post collected telemetry data to.
-  -f, --files <files...>       List of files to scan for JSX Scope attributes, can be an array of path(s) or glob(s). Required to generate JSX scope options
+  -f, --files <files...>       Files to scan for component attributes. Can be an array of path(s) or glob(s). Required for JSX and Web Component scope options.
   -i, --ignore <files...>      Files to ignore when scanning for JSX Scope attributes, in glob(s) form.
   -p, --file-path <file-path>  Path to create config file at, defaults to `telemetry.yml` (default: "telemetry.yml")
+  --wc                         Includes Web Component scope in config generation. Disables config generation for JSX scope.
   --no-npm                     Disables config generation for npm scope
   --no-jsx                     Disables config generation for JSX scope
   --no-js                      Disables config generation for JS scope
@@ -85,9 +87,10 @@ Modify in whole or part an existing telemetry config file
 Options:
   --id <project-id>            Project Id, should be obtained from the IBM Telemetry team
   --endpoint <endpoint>        URL of an OpenTelemetry-compatible metrics collector API endpoint. Used to post collected telemetry data to.
-  -f, --files <files...>       List of files to scan for JSX Scope attributes, can be an array of path(s) or glob(s). Required to generate JSX scope options
+  -f, --files <files...>       Files to scan for component attributes. Can be an array of path(s) or glob(s). Required for JSX and Web Component scope options.
   -i, --ignore <files...>      Files to ignore when scanning for JSX Scope attributes, in glob(s) form.
   -p, --file-path <file-path>  Path to create config file at, defaults to `telemetry.yml` (default: "telemetry.yml")
+  --wc                         Includes Web Component scope in config generation. Disables config generation for JSX scope.
   --no-npm                     Disables config generation for npm scope
   --no-jsx                     Disables config generation for JSX scope
   --no-js                      Disables config generation for JS scope
@@ -299,3 +302,71 @@ Options:
 `ibmtelemetry-config js update`
 
 `npx -y @ibm/telemetry-js-config-generator js remove`
+
+### wc
+
+Use `wc` command along with `add`, `update` or `remove` subcommands. Remember to supply the
+`file path` parameter if your telemetry config is not at the default location.
+
+```
+Usage: ibmtelemetry-config wc [options] [command]
+
+Add, update or remove wc scope
+
+Options:
+  -h, --help        display help for command
+
+Commands:
+  add [options]     Add wc scope to current config file
+  update [options]  Regenerate the wc scope
+  remove [options]  Remove wc scope from current config file
+  help [command]    display help for command
+```
+
+#### Subcommands
+
+##### Add
+
+```
+Usage: ibmtelemetry-config wc add [options]
+
+Add wc scope to current config file
+
+Options:
+  -f, --files <files...>       Files to scan for Web Component attributes, can be an array of path(s) or glob(s). Required to generate Web Component scope options.
+  -p, --file-path <file-path>  Path to create config file at, defaults to `telemetry.yml` (default: "telemetry.yml")
+  -h, --help                   display help for command
+```
+
+##### Update
+
+```
+Usage: ibmtelemetry-config wc update [options]
+
+Regenerate the wc scope
+
+Options:
+  -f, --files <files...>       Files to scan for Web Component attributes, can be an array of path(s) or glob(s). Required to generate Web Component scope options.
+  -p, --file-path <file-path>  Path to create config file at, defaults to `telemetry.yml` (default: "telemetry.yml")
+  -h, --help                   display help for command
+```
+
+##### Remove
+
+```
+Usage: ibmtelemetry-config wc remove [options]
+
+Remove wc scope from current config file
+
+Options:
+  -p, --file-path <file-path>  Path to create config file at, defaults to `telemetry.yml` (default: "telemetry.yml")
+  -h, --help                   display help for command
+```
+
+#### Example Usage
+
+`npx -y @ibm/telemetry-js-config-generator wc add -f ./src/components`
+
+`ibmtelemetry-config wc update --files ./src/components`
+
+`npx -y @ibm/telemetry-js-config-generator wc remove`

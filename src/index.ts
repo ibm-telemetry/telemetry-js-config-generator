@@ -12,6 +12,7 @@ import { buildJsCommand } from './commands/js.js'
 import { buildJsxCommand } from './commands/jsx.js'
 import { buildNpmCommand } from './commands/npm.js'
 import { buildUpdateCommand } from './commands/update.js'
+import { buildWcCommand } from './commands/wc.js'
 
 async function main() {
   const program = new Command()
@@ -21,6 +22,7 @@ async function main() {
     .addCommand(buildNpmCommand())
     .addCommand(buildJsCommand())
     .addCommand(buildJsxCommand())
+    .addCommand(buildWcCommand())
 
   try {
     await program.parseAsync()
