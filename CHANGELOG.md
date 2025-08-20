@@ -1,5 +1,23 @@
 # Changelog
 
+## [2.1.0](https://github.com/ibm-telemetry/telemetry-js-config-generator/compare/v2.0.1...v2.1.0) (2025-07-22)
+
+
+### Features
+
+* add web component scope to config generator ([#69](https://github.com/ibm-telemetry/telemetry-js-config-generator/issues/69)) ([527f588](https://github.com/ibm-telemetry/telemetry-js-config-generator/commit/527f5881a00ba022322ded70a44e003821391d43))
+
+
+### Bug Fixes
+
+* **deps:** upgrade contributor-assistant/github-action action to v2.5.1 ([#60](https://github.com/ibm-telemetry/telemetry-js-config-generator/issues/60)) ([f4fc3e4](https://github.com/ibm-telemetry/telemetry-js-config-generator/commit/f4fc3e45ef8f41f98e85eb06487f21890dd3cb39))
+* **deps:** upgrade dependency yaml to ^2.5.0 ([#57](https://github.com/ibm-telemetry/telemetry-js-config-generator/issues/57)) ([abe87a7](https://github.com/ibm-telemetry/telemetry-js-config-generator/commit/abe87a7ef08957a8a7dccc663ba571e8a6b67935))
+* **deps:** upgrade dependency yaml to ^2.5.1 ([#62](https://github.com/ibm-telemetry/telemetry-js-config-generator/issues/62)) ([c624d2e](https://github.com/ibm-telemetry/telemetry-js-config-generator/commit/c624d2edc28b645f986c9940423b42eb71fad1df))
+* **deps:** upgrade devDependencies (minor) ([#56](https://github.com/ibm-telemetry/telemetry-js-config-generator/issues/56)) ([c6b35f5](https://github.com/ibm-telemetry/telemetry-js-config-generator/commit/c6b35f5fe274d122c91269925b49228903c213e3))
+* **deps:** upgrade devDependencies (minor) ([#59](https://github.com/ibm-telemetry/telemetry-js-config-generator/issues/59)) ([0c0a74a](https://github.com/ibm-telemetry/telemetry-js-config-generator/commit/0c0a74a97fcbf9aa944b57b586a0081ea0598287))
+* **deps:** upgrade devDependencies (minor) ([#61](https://github.com/ibm-telemetry/telemetry-js-config-generator/issues/61)) ([147c6d3](https://github.com/ibm-telemetry/telemetry-js-config-generator/commit/147c6d3ae62f82b75e63524ad8854eae7ea7e025))
+* **deps:** upgrade devDependencies (minor) ([#63](https://github.com/ibm-telemetry/telemetry-js-config-generator/issues/63)) ([460fee5](https://github.com/ibm-telemetry/telemetry-js-config-generator/commit/460fee5fe76d706e576cfc6c2e236431d887b491))
+
 ## [2.0.1](https://github.com/ibm-telemetry/telemetry-js-config-generator/compare/v2.0.0...v2.0.1) (2024-07-25)
 
 
