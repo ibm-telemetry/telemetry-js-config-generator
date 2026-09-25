@@ -9,6 +9,7 @@ import { InvalidArgumentError } from 'commander'
 import yaml from 'yaml'
 
 import { getWcScopeConfig } from './get-wc-scope-config.js'
+import { mergeStringLists } from './merge-string-lists.js'
 
 /**
  * Updates the Web Component scope configuration within an existing `collect` node.
@@ -30,5 +31,30 @@ export async function updateWcConfig(
       '--files argument must be specified for Web Component scope generation'
     )
   }
-  collectNode.set('wc', await getWcScopeConfig(files, configFile))
+
+  const newWcConfig = await getWcScopeConfig(files, configFile)
+
+  if (newWcConfig !== null) {
+    const existingElements = collectNode.getIn(['wc', 'elements'])
+
+    if (existingElements !== undefined && existingElements !== null) {
+      // allowedAttributeStringValues: union of existing and newly-discovered
+      // values so hand-curated entries are kept and new ones from source are added.
+      newWcConfig.elements.allowedAttributeStringValues = mergeStringLists(
+        existingElements.get('allowedAttributeStringValues'),
+        newWcConfig.elements.allowedAttributeStringValues
+      )
+
+      // allowedAttributeObjectKeys: preserve only — getWcScopeConfig never
+      // produces this key, so there are no new values to merge in.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- optional key
+      const elements = newWcConfig.elements as Record<string, any>
+      const existingObjectKeys = existingElements.get('allowedAttributeObjectKeys')
+      if (existingObjectKeys !== undefined && existingObjectKeys !== null) {
+        elements['allowedAttributeObjectKeys'] = existingObjectKeys
+      }
+    }
+  }
+
+  collectNode.set('wc', newWcConfig)
 }
