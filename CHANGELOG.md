@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/ibm-telemetry/telemetry-js-config-generator/compare/v2.1.0...v2.2.0) (2026-09-28)
+
+
+### Features
+
+* update command preserves manually added values ([#79](https://github.com/ibm-telemetry/telemetry-js-config-generator/issues/79)) ([e8a0ff4](https://github.com/ibm-telemetry/telemetry-js-config-generator/commit/e8a0ff4e4905d54356fdfd7a44958f78762c81a3))
+
 ## [2.1.0](https://github.com/ibm-telemetry/telemetry-js-config-generator/compare/v2.0.1...v2.1.0) (2025-07-22)
 
 
