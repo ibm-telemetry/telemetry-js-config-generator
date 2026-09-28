@@ -79,9 +79,8 @@ To update an existing telemetry config file, run the `update` command. You can u
 regenerate entirely a telemetry configuration or only in-part (see available parameters). Remember
 to supply the `file path` parameter if your telemetry config is not at the default location.
 
-> **Note**
-> The `update` command preserves manually curated allowlist entries that cannot be discovered
-> automatically from source files:
+> **Note** The `update` command preserves manually curated allowlist entries that cannot be
+> discovered automatically from source files:
 >
 > - `wc` and `jsx` scopes: `allowedAttributeStringValues` and `allowedAttributeObjectKeys` inside
 >   `elements` are kept as-is; only `allowedAttributeNames` is regenerated.
