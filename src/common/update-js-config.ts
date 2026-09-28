@@ -16,5 +16,16 @@ import { getJsScopeConfig } from './get-js-scope-config.js'
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- unsure of yaml type
 export function updateJsConfig(collectNode: any) {
-  collectNode.set('js', getJsScopeConfig())
+  const newJsConfig = getJsScopeConfig()
+
+  // allowedArgumentStringValues: preserve only — getJsScopeConfig never
+  // produces this key (functions is always {}), so there are no new values
+  // to merge in; just carry forward whatever was hand-curated in the file.
+  const existingFunctions = collectNode.getIn(['js', 'functions'])
+  const existingAllowedValues = existingFunctions?.get?.('allowedArgumentStringValues')
+  if (existingAllowedValues !== undefined && existingAllowedValues !== null) {
+    newJsConfig.functions = { allowedArgumentStringValues: existingAllowedValues }
+  }
+
+  collectNode.set('js', newJsConfig)
 }
